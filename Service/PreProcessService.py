@@ -1,14 +1,16 @@
 import numpy as np
+from PIL import Image,ImageEnhance
 
 
 class PreProcess:
 
     def OtsuThresholding(self, max):
-        """This function calculate the Otsu thresholding of image in Dicom file.
-            For more information about the Otsu method see this link: https://en.wikipedia.org/wiki/Otsu%27s_method
+        """This function calculates the Otsu thresholding of the image in the Dicom file.
+            For more information about the Otsu method see this link:
+            https://en.wikipedia.org/wiki/Otsu%27s_method
 
         Args:
-            self: pixel_array in Dicom file.
+            self: pixel_array in the Dicom file.
             max: Maximum value that can be assigned to a pixel.
 
         Returns:
@@ -59,10 +61,24 @@ class PreProcess:
 
         return final_img
 
-    def GammaBlur(self):
+    def GammaCorrection(self, gamma):
+        """This function calculates the Gamma Correction of the image in the Dicom file.
+            For more information about the Gamma Correction see this link:
+            https://en.wikipedia.org/wiki/Gamma_correction
+
+        Args:
+            self: pixel_array in the Dicom file.
+            max: Maximum value that can be assigned to a pixel.
+
+        Returns:
+            The return value is the thresholded image.
+
+        """
+        image = np.power(self/float(np.max(self)), gamma)
+
+        return image
+
+    def ContrastAdjust(self, brightness):
         """ Write your implementation here"""
         pass
 
-    def ContrastChange(self):
-        """ Write your implementation here"""
-        pass
