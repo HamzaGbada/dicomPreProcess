@@ -78,7 +78,14 @@ class PreProcess:
 
         return image
 
-    def ContrastAdjust(self, brightness):
+    def ContrastAdjust(self, contrast, brightness):
         """ Write your implementation here"""
-        pass
+        # final_img = self.copy()
+        # final_img[final_img < final_img.max()-brightness ] += brightness
+        # return final_img
+        img = self.copy()
+        quotient = self.max()//2
+        img = img * (contrast / quotient + 1) - contrast
+        img = np.clip(img, 0, self.max())
+        return img
 
