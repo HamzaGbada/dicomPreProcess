@@ -1,5 +1,4 @@
 import numpy as np
-from PIL import Image,ImageEnhance
 
 
 class PreProcess:
@@ -71,21 +70,46 @@ class PreProcess:
             max: Maximum value that can be assigned to a pixel.
 
         Returns:
-            The return value is the thresholded image.
+            The return value is the corrected image.
 
         """
-        image = np.power(self/float(np.max(self)), gamma)
+        image = np.power(self/float(4095), gamma)
 
         return image
 
     def ContrastAdjust(self, contrast, brightness):
-        """ Write your implementation here"""
-        # final_img = self.copy()
-        # final_img[final_img < final_img.max()-brightness ] += brightness
-        # return final_img
+        """This function used to adjust the contrast and the brightness
+        the image in the Dicom file.
+            This approach is based this equation that can be used to apply
+        both contrast and brightness at the same time:
+            ****
+            new_img = alpha*old_img + beta
+            ****
+            Where alpha and beta are contrast and brightness coefficient respectively:
+
+            alpha 1  beta 0      --> no change
+            0 < alpha < 1        --> lower contrast
+            alpha > 1            --> higher contrast
+            -2047 < beta < +2047   --> good range for brightness values
+
+            In my case:
+                alpha = contrast / 2047 + 1
+                beta = brightness - contrast
+
+        Args:
+            self: pixel_array in the Dicom file.
+            max: Maximum value that can be assigned to a pixel.
+
+        Returns:
+            The return value is an image with different contrast and brightness.
+
+        """
         img = self.copy()
-        quotient = self.max()//2
-        img = img * (contrast / quotient + 1) - contrast
-        img = np.clip(img, 0, self.max())
+        quotient = 4095//2
+        alpha = contrast / quotient + 1
+        beta = brightness - contrast
+        img = img * alpha + beta
+
+        img = np.clip(img, 0, 4095)
         return img
 
