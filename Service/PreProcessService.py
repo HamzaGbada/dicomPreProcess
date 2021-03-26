@@ -1,3 +1,6 @@
+#  أليلتنا بذي حسم انيري *** إذا انت انقضيت فلا تحوري
+#  فإن يكن بالذنائب طال ليلي *** فقد ابكي من الليل القصيري
+
 import numpy as np
 
 
@@ -13,7 +16,7 @@ class PreProcess:
             max: Maximum value that can be assigned to a pixel.
 
         Returns:
-            The return value is the thresholded image.
+            The return value is the threshold image.
 
         """
 
@@ -98,7 +101,8 @@ class PreProcess:
 
         Args:
             self: pixel_array in the Dicom file.
-            max: Maximum value that can be assigned to a pixel.
+            contrast: the contrast value to be applied.
+            brightness: the brightness value to be applied.
 
         Returns:
             The return value is an image with different contrast and brightness.
