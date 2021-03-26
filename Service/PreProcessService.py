@@ -77,6 +77,7 @@ class PreProcess:
 
         """
         image = np.power(self/float(4095), gamma)
+        image = image*4095
 
         return image
 
