@@ -1,25 +1,35 @@
-from flask_restful import Resource
-from Controller.Model import ImageModel
+#  أليلتنا بذي حسم انيري *** إذا انت انقضيت فلا تحوري
+#  فإن يكن بالذنائب طال ليلي *** فقد ابكي من الليل القصيري
+
+import werkzeug
+from flask_restful import Resource, reqparse
 from Service.PreProcessService import PreProcess
-from flask import request
 import numpy as np
-import json
-from Mapper.jsonMapper import NumpyArrayEncoder
+from flask import render_template, make_response
+from Mapper.DicomMapper import DicomMapper
+
 
 class ContrastAdjust(Resource):
 
     def post(self, contrast, brightness):
-        imageModel = ImageModel(None,None,None);
-        data = request.get_json(force=True)
-        imageList = data["pixel_data"]
+        # get the dicom file from post request
+        parse = reqparse.RequestParser()
+        parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+        args = parse.parse_args()
+        uploaded_file = args['file']
+        uploaded_file.save("temp.dcm")
+
+        # get pixel_array from the dicom file
+        imageList = DicomMapper.fromDicomToPixel("temp.dcm")
+
+        # process the pixel_data
         image = np.array(imageList)
         output = PreProcess.ContrastAdjust(image, contrast, brightness)
-        imageModel.pixel_data = output
-        imageModel.height = output.shape[0]
-        imageModel.width = output.shape[1]
 
-        # Serialization
-        numpyData = {"array": imageModel.pixel_data}
-        encodedNumpyData = json.dumps(numpyData, cls=NumpyArrayEncoder)
+        # save the processed image to the dicom file
+        DicomMapper.fromPixelToDicom(output, "temp.dcm")
 
-        return encodedNumpyData
+        # render the html template
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template('page_2/index.html'),200,headers)
+
