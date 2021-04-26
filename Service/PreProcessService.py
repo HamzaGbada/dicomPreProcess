@@ -118,3 +118,5 @@ class PreProcess:
         img = np.clip(img, 0, 4095)
         return img
 
+    def contrast_approch(self):
+        pass
