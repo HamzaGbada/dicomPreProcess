@@ -6,15 +6,14 @@ import numpy as np
 
 class PixelArrayOperation:
 
-    def normalize(self):
-        x = 255 / 4096
-        matrix = x * self
-        return matrix.astype(np.uint8)
-
-    def denormalize(self):
-        x = 4096 / 255
-        matrix = x * self
-        return matrix.astype(np.uint16)
+    def from12bitTo8bit(pixel_data, a, b):
+        maxvalue = 255
+        maximum = pixel_data.max()
+        minimum = pixel_data.min()
+        round_array = np.rint((pixel_data - a) / (b - a) * maxvalue)
+        m = np.clip(round_array, 0, maxvalue)
+        image8 = m / maxvalue * (maximum - minimum) + minimum
+        return image8
 
     def convolution(oldimage, kernel):
         kernel_h = kernel.shape[0]
