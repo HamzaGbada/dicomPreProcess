@@ -2,32 +2,41 @@
 #  فإن يكن بالذنائب طال ليلي *** فقد ابكي من الليل القصيري
 import numpy as np
 from Mapper.mathOperation import PixelArrayOperation
+from math import sqrt, pi
 
 
 class GRAIL:
 
     @classmethod
-    def gabor_kernel(self, kernel_size, sigma, gamma, lamda, psi, angle):
-        gabor_kernel = np.zeros((kernel_size, kernel_size), np.float32)
+    def gabor_kernel(self, kernel_size, f, theta):
+
+        gabor_kernel = np.zeros((kernel_size, kernel_size), dtype='complex_')
         m = kernel_size // 2
         n = kernel_size // 2
-        # degree -> radian
-        theta = angle / 180. * np.pi
-        for i in range(-m, m + 1):
-            for j in range(-n, n + 1):
-                # get kernel x
-                x = np.cos(theta) * i + np.sin(theta) * j
-                # get kernel y
-                y = -np.sin(theta) * i + np.cos(theta) * j
+        for k in range(-m, m + 1):
+            for l in range(-n, n + 1):
 
-                gabor_kernel[i + m, j + n] = np.exp(-(x ** 2 + gamma ** 2 * y ** 2) / (2 * sigma ** 2)) * np.cos(
-                    2 * np.pi * x / lamda + psi)
+                x = np.cos(theta) * k + np.sin(theta) * l
+                y = -np.sin(theta) * k + np.cos(theta) * l
+
+                gabor_kernel[k + m, l + n] = np.exp(-(x ** 2 + y ** 2) * (1 / 2 * f ** 2)) * np.exp(f * np.pi * x * 2j)
 
         return gabor_kernel
 
-    def gabor_response(pixel_data, kernel_size, sigma, gamma, lamda, psi, theta):
+    @classmethod
+    def gabor_blank_filter(self, kernel_size, scales, orientation):
+        fmax = 0.25
+        gabor_list = []
+        for i in range(scales):
+            fi = fmax / (sqrt(2) ** i)
+            for j in range(orientation):
+                theta = pi * (j / orientation)
+                gabor_list.append(GRAIL.gabor_kernel(kernel_size, fi, theta))
+        return gabor_list
 
-        kernel = GRAIL.gabor_kernel(kernel_size, sigma, gamma, lamda, psi, theta)
+    def gabor_response(pixel_data, kernel_size, f, theta):
+
+        kernel = GRAIL.gabor_kernel(kernel_size, f, theta)
         im_filtered = np.zeros(pixel_data.shape, dtype=np.float32)
         im_filtered[:, :] = PixelArrayOperation.convolution(pixel_data[:, :], kernel)
 
