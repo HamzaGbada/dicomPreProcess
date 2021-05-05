@@ -19,7 +19,7 @@ class GRAIL:
                 x = np.cos(theta) * k + np.sin(theta) * l
                 y = -np.sin(theta) * k + np.cos(theta) * l
 
-                gabor_kernel[k + m, l + n] = np.exp(-(x ** 2 + y ** 2) * (1 / 2 * f ** 2)) * np.exp(f * np.pi * x * 2j)
+                gabor_kernel[k + m - 1, l + n - 1] = np.exp(-(x ** 2 + y ** 2) * (1 / 2 * f ** 2)) * np.exp(f * np.pi * x * 2j)
 
         return gabor_kernel
 
@@ -33,6 +33,20 @@ class GRAIL:
                 theta = pi * (j / orientation)
                 gabor_list.append(GRAIL.gabor_kernel(kernel_size, fi, theta))
         return gabor_list
+
+    @classmethod
+    def gabor_feature(self, pixel_data, gabor_list, d1, d2, scale, orientation):
+        gabor_result = []
+        for kernel in gabor_list:
+            im_filtered = np.zeros(pixel_data.shape, dtype='complex_')
+            im_filtered[:, :] = PixelArrayOperation.convolution(pixel_data[:, :], kernel)
+            gabor_result.append(im_filtered)
+        feature_vector = np.empty(0)
+        for res in gabor_result:
+            gabor_abs = abs(res)
+            feat_col = gabor_abs[::d1, ::d2].reshape(-1)
+            feature_vector = np.append(feature_vector, feat_col)
+        return feature_vector
 
     def gabor_response(pixel_data, kernel_size, f, theta):
 
