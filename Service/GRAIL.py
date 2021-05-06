@@ -80,13 +80,13 @@ class GRAIL:
 
         return octat_gabor
 
-    def gabor_entropy(pixel_data, gabor_pixel_data, a, b, scales, orientations):
+    def gabor_mutual_information(pixel_data, gabor_pixel_data, a, b, scales, orientations):
 
         octat_gabor = GRAIL.gabor_8bit_respresentation(pixel_data, a, b, scales, orientations)
         MI = InformationTheory.mutual_information(gabor_pixel_data, octat_gabor)
 
         return MI
-    
+
     def quality_measurement(self):
         pass
 
