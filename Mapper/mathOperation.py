@@ -22,15 +22,15 @@ class PixelArrayOperation:
         if (len(oldimage.shape) == 3):
             image_pad = np.pad(oldimage,
                                pad_width=((kernel_h // 2, kernel_h // 2), (kernel_w // 2, kernel_w // 2), (0, 0)),
-                               mode='constant', constant_values=0).astype(np.float32)
+                               mode='constant', constant_values=0).astype(complex)
         elif (len(oldimage.shape) == 2):
             image_pad = np.pad(oldimage, pad_width=(
                 (kernel_h // 2, kernel_h // 2), (kernel_w // 2, kernel_w // 2)), mode='constant',
-                               constant_values=0).astype(np.float32)
+                               constant_values=0).astype(complex)
         h = kernel_h // 2
         w = kernel_w // 2
 
-        image_conv = np.zeros(image_pad.shape)
+        image_conv = np.zeros(image_pad.shape, dtype='complex_')
 
         for i in range(h, image_pad.shape[0] - h):
             for j in range(w, image_pad.shape[1] - w):
