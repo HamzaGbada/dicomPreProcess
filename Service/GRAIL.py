@@ -1,8 +1,9 @@
 #  أليلتنا بذي حسم انيري *** إذا انت انقضيت فلا تحوري
 #  فإن يكن بالذنائب طال ليلي *** فقد ابكي من الليل القصيري
 import numpy as np
-from Mapper.mathOperation import PixelArrayOperation
 from math import sqrt, pi
+from Mapper.mathOperation import PixelArrayOperation
+from Mapper.mathOperation import InformationTheory
 
 
 class GRAIL:
@@ -48,8 +49,11 @@ class GRAIL:
             feature_vector = np.append(feature_vector, feat_col)
         return feature_vector
 
-    def gabor_decomposition(pixel_data, kernel_size, d1, d2, scales, orientations):
-
+    @classmethod
+    def gabor_decomposition(self, pixel_data, scales, orientations):
+        kernel_size = 39
+        d1 = 1
+        d2 = 1
         feature_size = scales * orientations
         gabor_list = GRAIL.gabor_blank_filter(kernel_size, scales, orientations)
         feature_vector = GRAIL.gabor_feature(pixel_data, gabor_list, d1, d2)
@@ -68,6 +72,21 @@ class GRAIL:
 
         return im_filtered
 
+    @classmethod
+    def gabor_8bit_respresentation(self, pixel_data, a, b, scales, orientations):
+
+        octat_array = PixelArrayOperation.from12bitTo8bit(pixel_data, a, b)
+        octat_gabor = GRAIL.gabor_decomposition(octat_array,scales,orientations)
+
+        return octat_gabor
+
+    def gabor_entropy(pixel_data, gabor_pixel_data, a, b, scales, orientations):
+
+        octat_gabor = GRAIL.gabor_8bit_respresentation(pixel_data, a, b, scales, orientations)
+        MI = InformationTheory.mutual_information(gabor_pixel_data, octat_gabor)
+
+        return MI
+    
     def quality_measurement(self):
         pass
 
