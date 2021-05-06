@@ -48,6 +48,18 @@ class GRAIL:
             feature_vector = np.append(feature_vector, feat_col)
         return feature_vector
 
+    def gabor_decomposition(pixel_data, kernel_size, d1, d2, scales, orientations):
+
+        feature_size = scales * orientations
+        gabor_list = GRAIL.gabor_blank_filter(kernel_size, scales, orientations)
+        feature_vector = GRAIL.gabor_feature(pixel_data, gabor_list, d1, d2)
+        feat_v = np.reshape(feature_vector, (pixel_data.shape[0], pixel_data.shape[0], feature_size), order='F')
+        for i in range(feature_size):
+            feat_v[:, :, i] = feat_v[:, :, i] / np.max(feat_v[:, :, i])
+        feat_v = np.minimum(feat_v, 0.5) * 512
+
+        return feat_v
+
     def gabor_response(pixel_data, kernel_size, f, theta):
 
         kernel = GRAIL.gabor_kernel(kernel_size, f, theta)
