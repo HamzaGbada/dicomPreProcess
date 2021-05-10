@@ -8,8 +8,8 @@ class PixelArrayOperation:
 
     def from12bitTo8bit(pixel_data, a, b):
         maxvalue = 255
-        maximum = pixel_data.max()
-        minimum = pixel_data.min()
+        maximum = int(pixel_data.max())
+        minimum = int(pixel_data.min())
         round_array = np.rint((pixel_data - a) / (b - a) * maxvalue)
         m = np.clip(round_array, 0, maxvalue)
         image8 = m / maxvalue * (maximum - minimum) + minimum
@@ -50,8 +50,8 @@ class InformationTheory:
 
     @classmethod
     def entropy(self, pixel_data):
-        maximum = pixel_data.max()
-        minimum = pixel_data.min()
+        maximum = int(pixel_data.max())
+        minimum = int(pixel_data.min())
         size = pixel_data.size
         histogram, bin_edges = np.histogram(pixel_data, bins=maximum - minimum + 1, range=(minimum, maximum + 1))
         probabilities = histogram / size
@@ -62,6 +62,9 @@ class InformationTheory:
 
     @classmethod
     def joint_entropy(self, pixel_data, dest_data):
+
+        pixel_data = pixel_data.flatten()
+        dest_data = dest_data.flatten()
         joint_histogram, _, _ = np.histogram2d(pixel_data, dest_data)
         joint_histogram_without_zero = joint_histogram[joint_histogram != 0]
         joint_prob = joint_histogram_without_zero / dest_data.size
@@ -73,5 +76,11 @@ class InformationTheory:
         mi = InformationTheory.entropy(pixel_data) + InformationTheory.entropy(dest_data) - InformationTheory.joint_entropy(pixel_data, dest_data)
 
         return mi
+
+    def mutual_information_12_and_8bit(pixel_data, a, b):
+        octat_array = PixelArrayOperation.from12bitTo8bit(pixel_data, a, b)
+        octat_mi = InformationTheory.mutual_information(pixel_data, octat_array)
+
+        return octat_mi
 
 

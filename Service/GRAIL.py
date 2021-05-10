@@ -50,10 +50,8 @@ class GRAIL:
         return feature_vector
 
     @classmethod
-    def gabor_decomposition(self, pixel_data, scales, orientations):
-        kernel_size = 39
-        d1 = 1
-        d2 = 1
+    def gabor_decomposition(self, pixel_data, scales,   orientations, kernel_size = 39, d1 = 1, d2 = 1):
+
         feature_size = scales * orientations
         gabor_list = GRAIL.gabor_blank_filter(kernel_size, scales, orientations)
         feature_vector = GRAIL.gabor_feature(pixel_data, gabor_list, d1, d2)
@@ -83,9 +81,9 @@ class GRAIL:
     def gabor_mutual_information(pixel_data, gabor_pixel_data, a, b, scales, orientations):
 
         octat_gabor = GRAIL.gabor_8bit_respresentation(pixel_data, a, b, scales, orientations)
-        MI = InformationTheory.mutual_information(gabor_pixel_data, octat_gabor)
+        gabor_mi = InformationTheory.mutual_information(gabor_pixel_data, octat_gabor)
 
-        return MI
+        return gabor_mi
 
     def gabor_entropy(pixel_data, gabor_pixel_data, a, b, scales, orientations):
 
