@@ -106,15 +106,15 @@ class GRAIL:
       b_step = np.arange(b_0, b_mean-1, -step)
       pixel_data_gabor = GRAIL.gabor_decomposition(pixel_data, scales, orientations,2,1,1)
 
-      mutual_info_list = []
+      mutual_info_array = np.empty(0)
 
       for b_k in b_step:
         gabor_mi = GRAIL.gabor_mutual_information(pixel_data, pixel_data_gabor, a_k, b_k, scales, orientations)
-        mutual_info_list.append(gabor_mi)
+        mutual_info_array = np.append(mutual_info_array, gabor_mi)
 
-      return mutual_info_list, b_step
+      return mutual_info_array, b_step
 
-    def mutual_information_gabor_lowest_intensity(pixel_data, step, scales, orientations, a_0=None, a_mean=None, b_0=None):
+    def mutual_information_gabor_lowest_intensity(pixel_data, step, scales, orientations, a_mean=None, a_0=None, b_0=None):
 
       if b_0 is None:
         b_0 = pixel_data.max()
@@ -123,19 +123,46 @@ class GRAIL:
       if a_mean is None:
         a_mean = round(np.mean(pixel_data))
 
-      a_k = a_0
+      b_k = b_0
       a_step = np.arange(a_0, a_mean+1, step)
       pixel_data_gabor = GRAIL.gabor_decomposition(pixel_data, scales, orientations,2,1,1)
 
-      mutual_info_list = []
+      mutual_info_array = np.empty(0)
 
-      for b_k in a_step:
-        gabor_mi = GRAIL.gabor_mutual_information(pixel_data, pixel_data_gabor, a_k, b_k, scales, orientations)
-        mutual_info_list.append(gabor_mi)
+      for a_k in a_step:
+        gabor_mi = GRAIL.gabor_mutual_information(pixel_data, pixel_data_gabor, b_k, a_k, scales, orientations)
+        mutual_info_array = np.append(mutual_info_array, gabor_mi)
 
-      return mutual_info_list, a_step
-    def quality_measurement(self):
-        pass
+      return mutual_info_array, a_step
 
-    def get_best_A_B(self):
-        pass
+    def get_best_a_b(pixel_data, scales=3, orientations=6, delta=300, k_max=3):
+
+        step_list = PixelArrayOperation.make_step(delta, k_max)
+
+        b_0 = pixel_data.max()  # bmax
+        b_mean = round(np.mean(pixel_data))  # bmin
+        a_0 = pixel_data.min()  # amin
+        a_mean = round(np.mean(pixel_data))  # amax
+        for step in step_list:
+            mutual_info_right_array, b_step = InformationTheory.mutual_information_gabor_highest_intensity(pixel_data,
+                                                                                                           step, scales,
+                                                                                                           orientations,
+                                                                                                           b_0, b_mean,
+                                                                                                           a_0)
+            max_ind = np.argmax(mutual_info_right_array)
+            best_b = b_step[max_ind]
+
+            mutual_info_left_array, a_step = InformationTheory.mutual_information_gabor_lowest_intensity(pixel_data,
+                                                                                                         step, scales,
+                                                                                                         orientations,
+                                                                                                         a_mean, a_0,
+                                                                                                         best_b)
+            max_ind = np.argmax(mutual_info_left_array)
+            best_a = a_step[max_ind]
+
+            a_0 = max(best_a - step, 0)
+            a_mean = best_a + step
+            b_mean = best_b - step
+            b_0 = max(best_b + step, pixel_data.max())
+
+        return best_a, best_b
