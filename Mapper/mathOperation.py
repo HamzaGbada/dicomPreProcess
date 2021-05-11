@@ -10,7 +10,11 @@ class PixelArrayOperation:
         maxvalue = 255
         maximum = int(pixel_data.max())
         minimum = int(pixel_data.min())
-        round_array = np.rint((pixel_data - a) / (b - a) * maxvalue)
+        if a == b:
+            normed = (pixel_data - a) / a * maxvalue
+        else:
+            normed = (pixel_data - a) / (b - a) * maxvalue
+        round_array = np.rint(normed)
         m = np.clip(round_array, 0, maxvalue)
         image8 = m / maxvalue * (maximum - minimum) + minimum
         return image8
