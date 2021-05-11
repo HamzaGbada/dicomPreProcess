@@ -113,6 +113,7 @@ class GRAIL:
         mutual_info_list.append(gabor_mi)
 
       return mutual_info_list, b_step
+
     def mutual_information_gabor_lowest_intensity(pixel_data, step, scales, orientations, a_0=None, a_mean=None, b_0=None):
 
       if b_0 is None:

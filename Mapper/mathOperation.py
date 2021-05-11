@@ -6,6 +6,16 @@ import numpy as np
 
 class PixelArrayOperation:
 
+    def make_step(delta, k_max):
+        step_list = []
+        step_list.append(delta)
+        for s in range(k_max - 1):
+            delta //= 10
+            if delta % 1 != 0:
+                break
+            step_list.append(delta)
+        return step_list
+    
     def from12bitTo8bit(pixel_data, a, b):
         maxvalue = 255
         maximum = int(pixel_data.max())
