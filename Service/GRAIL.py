@@ -144,7 +144,7 @@ class GRAIL:
         a_0 = pixel_data.min()  # amin
         a_mean = round(np.mean(pixel_data))  # amax
         for step in step_list:
-            mutual_info_right_array, b_step = InformationTheory.mutual_information_gabor_highest_intensity(pixel_data,
+            mutual_info_right_array, b_step = GRAIL.mutual_information_gabor_highest_intensity(pixel_data,
                                                                                                            step, scales,
                                                                                                            orientations,
                                                                                                            b_0, b_mean,
@@ -152,7 +152,7 @@ class GRAIL:
             max_ind = np.argmax(mutual_info_right_array)
             best_b = b_step[max_ind]
 
-            mutual_info_left_array, a_step = InformationTheory.mutual_information_gabor_lowest_intensity(pixel_data,
+            mutual_info_left_array, a_step = GRAIL.mutual_information_gabor_lowest_intensity(pixel_data,
                                                                                                          step, scales,
                                                                                                          orientations,
                                                                                                          a_mean, a_0,
