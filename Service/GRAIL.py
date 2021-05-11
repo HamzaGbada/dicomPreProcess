@@ -62,14 +62,6 @@ class GRAIL:
 
         return feat_v
 
-    def gabor_response(pixel_data, kernel_size, f, theta):
-
-        kernel = GRAIL.gabor_kernel(kernel_size, f, theta)
-        im_filtered = np.zeros(pixel_data.shape, dtype=np.float32)
-        im_filtered[:, :] = PixelArrayOperation.convolution(pixel_data[:, :], kernel)
-
-        return im_filtered
-
     @classmethod
     def gabor_8bit_respresentation(self, pixel_data, a, b, scales, orientations):
 
@@ -78,12 +70,21 @@ class GRAIL:
 
         return octat_gabor
 
+    @classmethod
     def gabor_mutual_information(pixel_data, gabor_pixel_data, a, b, scales, orientations):
 
         octat_gabor = GRAIL.gabor_8bit_respresentation(pixel_data, a, b, scales, orientations)
         gabor_mi = InformationTheory.mutual_information(gabor_pixel_data, octat_gabor)
 
         return gabor_mi
+
+    def gabor_response(pixel_data, kernel_size, f, theta):
+
+        kernel = GRAIL.gabor_kernel(kernel_size, f, theta)
+        im_filtered = np.zeros(pixel_data.shape, dtype=np.float32)
+        im_filtered[:, :] = PixelArrayOperation.convolution(pixel_data[:, :], kernel)
+
+        return im_filtered
 
     def gabor_entropy(pixel_data, gabor_pixel_data, a, b, scales, orientations):
 
@@ -92,6 +93,46 @@ class GRAIL:
 
         return gabor_entropy
 
+    def mutual_information_gabor_highest_intensity(pixel_data, step, scales, orientations, b_0=None, b_mean=None, a_0=None):
+
+      if b_0 is None:
+        b_0 = pixel_data.max()
+      if a_0 is None:
+        a_0 = pixel_data.min()
+      if b_mean is None:
+        b_mean = round(np.mean(pixel_data))
+
+      a_k = a_0
+      b_step = np.arange(b_0, b_mean-1, -step)
+      pixel_data_gabor = GRAIL.gabor_decomposition(pixel_data, scales, orientations,2,1,1)
+
+      mutual_info_list = []
+
+      for b_k in b_step:
+        gabor_mi = GRAIL.gabor_mutual_information(pixel_data, pixel_data_gabor, a_k, b_k, scales, orientations)
+        mutual_info_list.append(gabor_mi)
+
+      return mutual_info_list, b_step
+    def mutual_information_gabor_lowest_intensity(pixel_data, step, scales, orientations, a_0=None, a_mean=None, b_0=None):
+
+      if b_0 is None:
+        b_0 = pixel_data.max()
+      if a_0 is None:
+        a_0 = pixel_data.min()
+      if a_mean is None:
+        a_mean = round(np.mean(pixel_data))
+
+      a_k = a_0
+      a_step = np.arange(a_0, a_mean+1, step)
+      pixel_data_gabor = GRAIL.gabor_decomposition(pixel_data, scales, orientations,2,1,1)
+
+      mutual_info_list = []
+
+      for b_k in a_step:
+        gabor_mi = GRAIL.gabor_mutual_information(pixel_data, pixel_data_gabor, a_k, b_k, scales, orientations)
+        mutual_info_list.append(gabor_mi)
+
+      return mutual_info_list, a_step
     def quality_measurement(self):
         pass
 
