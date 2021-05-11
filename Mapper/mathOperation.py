@@ -15,7 +15,7 @@ class PixelArrayOperation:
                 break
             step_list.append(delta)
         return step_list
-    
+
     def from12bitTo8bit(pixel_data, a, b):
         maxvalue = 255
         maximum = int(pixel_data.max())
