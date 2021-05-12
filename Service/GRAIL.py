@@ -55,7 +55,7 @@ class GRAIL:
         feature_size = scales * orientations
         gabor_list = GRAIL.gabor_blank_filter(kernel_size, scales, orientations)
         feature_vector = GRAIL.gabor_feature(pixel_data, gabor_list, d1, d2)
-        feat_v = np.reshape(feature_vector, (pixel_data.shape[0], pixel_data.shape[0], feature_size), order='F')
+        feat_v = np.reshape(feature_vector, (pixel_data.shape[0], pixel_data.shape[1], feature_size), order='F')
         for i in range(feature_size):
             feat_v[:, :, i] = feat_v[:, :, i] / np.max(feat_v[:, :, i])
         feat_v = np.minimum(feat_v, 0.5) * 512
