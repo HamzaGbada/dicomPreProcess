@@ -21,7 +21,10 @@ class PixelArrayOperation:
         maximum = int(pixel_data.max())
         minimum = int(pixel_data.min())
         if a == b:
-            normed = (pixel_data - a) / a * maxvalue
+            if a == 0 :
+                normed = pixel_data * maxvalue
+            else:
+                normed = (pixel_data - a) / a * maxvalue
         else:
             normed = (pixel_data - a) / (b - a) * maxvalue
         round_array = np.rint(normed)

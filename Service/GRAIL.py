@@ -36,7 +36,7 @@ class GRAIL:
         return gabor_list
 
     @classmethod
-    def gabor_feature(self, pixel_data, gabor_list, d1, d2, scale, orientation):
+    def gabor_feature(self, pixel_data, gabor_list, d1, d2):
         gabor_result = []
         for kernel in gabor_list:
             im_filtered = np.zeros(pixel_data.shape, dtype='complex_')
@@ -50,14 +50,16 @@ class GRAIL:
         return feature_vector
 
     @classmethod
-    def gabor_decomposition(self, pixel_data, scales,   orientations, kernel_size = 39, d1 = 1, d2 = 1):
+    def gabor_decomposition(self, pixel_data, scales, orientations, kernel_size = 39, d1 = 1, d2 = 1):
 
         feature_size = scales * orientations
         gabor_list = GRAIL.gabor_blank_filter(kernel_size, scales, orientations)
         feature_vector = GRAIL.gabor_feature(pixel_data, gabor_list, d1, d2)
         feat_v = np.reshape(feature_vector, (pixel_data.shape[0], pixel_data.shape[1], feature_size), order='F')
         for i in range(feature_size):
-            feat_v[:, :, i] = feat_v[:, :, i] / np.max(feat_v[:, :, i])
+            max_feat = np.max(feat_v[:, :, i])
+            if max_feat != 0.0:
+                feat_v[:, :, i] = feat_v[:, :, i] / np.max(feat_v[:, :, i])
         feat_v = np.minimum(feat_v, 0.5) * 512
 
         return feat_v
