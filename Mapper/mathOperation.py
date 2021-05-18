@@ -17,20 +17,15 @@ class PixelArrayOperation:
         return step_list
 
     def from12bitTo8bit(pixel_data, a, b):
-        maxvalue = 255
-        maximum = int(pixel_data.max())
-        minimum = int(pixel_data.min())
         if a == b:
             if a == 0 :
-                normed = pixel_data * maxvalue
+                normed = pixel_data * 255
             else:
-                normed = (pixel_data - a) / a * maxvalue
+                normed = (pixel_data - a) / a * 255
         else:
-            normed = (pixel_data - a) / (b - a) * maxvalue
-        round_array = np.rint(normed)
-        m = np.clip(round_array, 0, maxvalue)
-        image8 = m / maxvalue * (maximum - minimum) + minimum
-        return image8
+            normed = (pixel_data - a) / (b - a) * 255
+
+        return (np.clip(np.rint(normed), 0, 255)) / 255 * (int(pixel_data.max()) - int(pixel_data.min())) + int(pixel_data.min())
 
     def convolution(oldimage, kernel):
         kernel_h = kernel.shape[0]
@@ -67,22 +62,17 @@ class InformationTheory:
 
     @classmethod
     def entropy(self, pixel_data):
-        maximum = int(pixel_data.max())
-        minimum = int(pixel_data.min())
-        size = pixel_data.size
-        histogram, bin_edges = np.histogram(pixel_data, bins=maximum - minimum + 1, range=(minimum, maximum + 1))
-        probabilities = histogram / size
-        probabilities = probabilities[probabilities != 0]
-        log2 = np.log2(probabilities)
 
-        return -np.sum(probabilities * log2)
+        histogram, bin_edges = np.histogram(pixel_data, bins=int(pixel_data.max()) - int(pixel_data.min()) + 1, range=(int(pixel_data.min()), int(pixel_data.max()) + 1))
+        probabilities = histogram / pixel_data.size
+        probabilities = probabilities[probabilities != 0]
+
+        return -np.sum(probabilities * np.log2(probabilities))
 
     @classmethod
     def joint_entropy(self, pixel_data, dest_data):
 
-        pixel_data = pixel_data.flatten()
-        dest_data = dest_data.flatten()
-        joint_histogram, _, _ = np.histogram2d(pixel_data, dest_data)
+        joint_histogram, _, _ = np.histogram2d(pixel_data.flatten(), dest_data.flatten())
         joint_histogram_without_zero = joint_histogram[joint_histogram != 0]
         joint_prob = joint_histogram_without_zero / dest_data.size
 

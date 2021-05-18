@@ -45,8 +45,7 @@ class GRAIL:
         feature_vector = np.empty(0)
         for res in gabor_result:
             gabor_abs = abs(res)
-            feat_col = gabor_abs[::d1, ::d2].reshape(-1)
-            feature_vector = np.append(feature_vector, feat_col)
+            feature_vector = np.append(feature_vector, gabor_abs[::d1, ::d2].reshape(-1))
         return feature_vector
 
     @classmethod
@@ -54,8 +53,7 @@ class GRAIL:
 
         feature_size = scales * orientations
         gabor_list = GRAIL.gabor_blank_filter(kernel_size, scales, orientations)
-        feature_vector = GRAIL.gabor_feature(pixel_data, gabor_list, d1, d2)
-        feat_v = np.reshape(feature_vector, (pixel_data.shape[0], pixel_data.shape[1], feature_size), order='F')
+        feat_v = np.reshape(GRAIL.gabor_feature(pixel_data, gabor_list, d1, d2), (pixel_data.shape[0], pixel_data.shape[1], feature_size), order='F')
         for i in range(feature_size):
             max_feat = np.max(feat_v[:, :, i])
             if max_feat != 0.0:
@@ -73,7 +71,7 @@ class GRAIL:
         return octat_gabor
 
     @classmethod
-    def gabor_mutual_information(pixel_data, gabor_pixel_data, a, b, scales, orientations):
+    def gabor_mutual_information(self, pixel_data, gabor_pixel_data, a, b, scales, orientations):
 
         octat_gabor = GRAIL.gabor_8bit_respresentation(pixel_data, a, b, scales, orientations)
         gabor_mi = InformationTheory.mutual_information(gabor_pixel_data, octat_gabor)
@@ -82,18 +80,14 @@ class GRAIL:
 
     def gabor_response(pixel_data, kernel_size, f, theta):
 
-        kernel = GRAIL.gabor_kernel(kernel_size, f, theta)
-        im_filtered = np.zeros(pixel_data.shape, dtype=np.float32)
-        im_filtered[:, :] = PixelArrayOperation.convolution(pixel_data[:, :], kernel)
+        im_filtered = np.zeros(pixel_data.shape, dtype='complex_')
+        im_filtered[:, :] = PixelArrayOperation.convolution(pixel_data[:, :], GRAIL.gabor_kernel(kernel_size, f, theta))
 
         return im_filtered
 
     def gabor_entropy(pixel_data, gabor_pixel_data, a, b, scales, orientations):
 
-        octat_gabor = GRAIL.gabor_8bit_respresentation(pixel_data, a, b, scales, orientations)
-        gabor_entropy = InformationTheory.joint_entropy(gabor_pixel_data, octat_gabor)
-
-        return gabor_entropy
+        return InformationTheory.joint_entropy(gabor_pixel_data, GRAIL.gabor_8bit_respresentation(pixel_data, a, b, scales, orientations))
 
     def mutual_information_gabor_highest_intensity(pixel_data, step, scales, orientations, b_0=None, b_mean=None, a_0=None):
 
