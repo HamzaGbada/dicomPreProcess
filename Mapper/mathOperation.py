@@ -16,16 +16,16 @@ class PixelArrayOperation:
             step_list.append(delta)
         return step_list
 
-    def from12bitTo8bit(pixel_data, a, b):
+    def from12bitTo8bit(image, a, b):
         if a == b:
             if a == 0 :
-                normed = pixel_data * 255
+                normed = image * 255
             else:
-                normed = (pixel_data - a) / a * 255
+                normed = (image - a) / a * 255
         else:
-            normed = (pixel_data - a) / (b - a) * 255
+            normed = (image - a) / (b - a) * 255
 
-        return (np.clip(np.rint(normed), 0, 255)) / 255 * (int(pixel_data.max()) - int(pixel_data.min())) + int(pixel_data.min())
+        return (np.clip(np.rint(normed), 0, 255)) / 255 * (int(image.max()) - int(image.min())) + int(image.min())
 
     def convolution(oldimage, kernel):
         kernel_h = kernel.shape[0]
@@ -60,33 +60,31 @@ class PixelArrayOperation:
 
 class InformationTheory:
 
-    @classmethod
-    def entropy(self, pixel_data):
+    def entropy(self, input):
 
-        histogram, bin_edges = np.histogram(pixel_data, bins=int(pixel_data.max()) - int(pixel_data.min()) + 1, range=(int(pixel_data.min()), int(pixel_data.max()) + 1))
-        probabilities = histogram / pixel_data.size
+        histogram, bin_edges = np.histogram(input, bins=int(input.max()) - int(input.min()) + 1, range=(int(input.min()), int(input.max()) + 1))
+        probabilities = histogram / input.size
         probabilities = probabilities[probabilities != 0]
 
         return -np.sum(probabilities * np.log2(probabilities))
 
-    @classmethod
-    def joint_entropy(self, pixel_data, dest_data):
+    def joint_entropy(self, input, dest_data):
 
-        joint_histogram, _, _ = np.histogram2d(pixel_data.flatten(), dest_data.flatten())
+        joint_histogram, _, _ = np.histogram2d(input.flatten(), dest_data.flatten())
         joint_histogram_without_zero = joint_histogram[joint_histogram != 0]
         joint_prob = joint_histogram_without_zero / dest_data.size
 
         return -np.sum(joint_prob * np.log2(joint_prob))
 
-    def mutual_information(pixel_data, dest_data):
+    def mutual_information(self, input, dest_data):
 
-        mi = InformationTheory.entropy(pixel_data) + InformationTheory.entropy(dest_data) - InformationTheory.joint_entropy(pixel_data, dest_data)
+        mi = self.entropy(input) + self.entropy(dest_data) - self.joint_entropy(input, dest_data)
 
         return mi
 
-    def mutual_information_12_and_8bit(pixel_data, a, b):
-        octat_array = PixelArrayOperation.from12bitTo8bit(pixel_data, a, b)
-        octat_mi = InformationTheory.mutual_information(pixel_data, octat_array)
+    def mutual_information_12_and_8bit(self, a, b):
+        octat_array = PixelArrayOperation.from12bitTo8bit(input, a, b)
+        octat_mi = self.mutual_information(input, octat_array)
 
         return octat_mi
 
