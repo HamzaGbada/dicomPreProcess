@@ -82,7 +82,7 @@ class InformationTheory:
 
         return mi
 
-    def mutual_information_12_and_8bit(self, a, b):
+    def mutual_information_12_and_8bit(self, input,  a, b):
         octat_array = PixelArrayOperation.from12bitTo8bit(input, a, b)
         octat_mi = self.mutual_information(input, octat_array)
 
