@@ -1,5 +1,7 @@
 #  أليلتنا بذي حسم انيري *** إذا انت انقضيت فلا تحوري
 #  فإن يكن بالذنائب طال ليلي *** فقد ابكي من الليل القصيري
+import logging
+
 import numpy as np
 from math import sqrt, pi
 
@@ -7,7 +9,18 @@ import pydicom
 
 from Mapper.mathOperation import PixelArrayOperation
 from Mapper.mathOperation import InformationTheory
-from PIL import Image
+
+
+# Create and configure logger
+logging.basicConfig(filename="newfile.log",
+                    format='%(asctime)s %(message)s',
+                    filemode='w')
+
+# Creating an object
+logger = logging.getLogger()
+
+# Setting the threshold of logger to DEBUG
+logger.setLevel(logging.DEBUG)
 
 
 class Gabor:
@@ -105,7 +118,9 @@ class Gabor_information(Gabor, InformationTheory):
         mutual_info_array = np.empty(0)
 
         for b_k in b_step:
+            logger.debug("b_k in highest intensity \n {}".format(b_k))
             gabor_mi = self.gabor_mutual_information(input, pixel_data_gabor, a_k, b_k, scales, orientations)
+            logger.debug("gabor Mutual Information in highest intensity \n {}".format(gabor_mi))
             mutual_info_array = np.append(mutual_info_array, gabor_mi)
 
         return mutual_info_array, b_step
@@ -127,7 +142,9 @@ class Gabor_information(Gabor, InformationTheory):
         mutual_info_array = np.empty(0)
 
         for a_k in a_step:
+            logger.debug("a_k in lowest intensity \n {}".format(a_k))
             gabor_mi = self.gabor_mutual_information(input, pixel_data_gabor, b_k, a_k, scales, orientations)
+            logger.debug("gabor Mutual Information in lowest intensity \n {}".format(gabor_mi))
             mutual_info_array = np.append(mutual_info_array, gabor_mi)
 
         return mutual_info_array, a_step
@@ -135,12 +152,18 @@ class Gabor_information(Gabor, InformationTheory):
     def get_best_a_b(self, input, scales=3, orientations=6, delta=300, k_max=3):
 
         step_list = PixelArrayOperation.make_step(delta, k_max)
-
+        logger.debug("Step List in get_best_a_b \n {} ".format(step_list))
         b_0 = input.max()  # bmax
         b_mean = round(np.mean(input))  # bmin
         a_0 = input.min()  # amin
         a_mean = round(np.mean(input))  # amax
+
+        logger.debug("bmax before update \n {}".format(b_0))
+        logger.debug("bmin before update \n {}".format(b_mean))
+        logger.debug("amin before update \n {}".format(a_0))
+        logger.debug("amax before update \n {}".format(a_mean))
         for step in step_list:
+            logger.debug("step during update  \n {}".format(step))
             mutual_info_right_array, b_step = self.mutual_information_gabor_highest_intensity(input, step, scales,
                                                                                               orientations, b_0, b_mean,
                                                                                               a_0)
@@ -157,6 +180,10 @@ class Gabor_information(Gabor, InformationTheory):
             a_mean = best_a + step
             b_mean = best_b - step
             b_0 = max(best_b + step, input.max())
+            logger.debug("bmax during update \n {}".format(b_0))
+            logger.debug("bmin during update \n {}".format(b_mean))
+            logger.debug("amin during update \n {}".format(a_0))
+            logger.debug("amax during update \n {}".format(a_mean))
 
         return best_a, best_b
 
@@ -171,7 +198,9 @@ class Data(Gabor_information):
         return self._pixel_data
 
     def main(self):
+        logger.debug("Pixel Data In Main \n {}".format(self._pixel_data))
         a, b = self.get_best_a_b(self._pixel_data)
+        logger.debug("Best a and b \n {}  \n {}".format(a, b))
         pixel_data = np.where(self._pixel_data > b, 255, self._pixel_data)
         pixel_data = np.where(pixel_data < a, 0, pixel_data)
         pixel_data = np.where(np.logical_and(pixel_data <= b, pixel_data >= a), (pixel_data - a) / (b - a) * 255,
