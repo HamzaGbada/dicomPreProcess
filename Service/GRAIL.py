@@ -10,7 +10,6 @@ import pydicom
 from Mapper.mathOperation import PixelArrayOperation
 from Mapper.mathOperation import InformationTheory
 
-
 # Create and configure logger
 logging.basicConfig(filename="newfile.log",
                     format='%(asctime)s %(message)s',
@@ -26,20 +25,6 @@ logger.setLevel(logging.DEBUG)
 class Gabor:
     def __init__(self):
         self._pixel_array_operation = PixelArrayOperation()
-    def gabor_kernel(self, kernel_size, f, theta):
-
-        gabor_kernel = np.zeros((kernel_size, kernel_size), dtype='complex_')
-        m = kernel_size // 2
-        n = kernel_size // 2
-        for k in range(-m, m + 1):
-            for l in range(-n, n + 1):
-                x = np.cos(theta) * k + np.sin(theta) * l
-                y = -np.sin(theta) * k + np.cos(theta) * l
-
-                gabor_kernel[k + m - 1, l + n - 1] = np.exp(-(x ** 2 + y ** 2) * (1 / 2 * f ** 2)) * np.exp(
-                    f * np.pi * x * 2j)
-
-        return gabor_kernel
 
     def gabor_blank_filter(self, kernel_size, scales, orientation):
         fmax = 0.25
@@ -66,7 +51,6 @@ class Gabor:
         return gabor_array
 
     def gabor_feature(self, input, gabor_list, d1, d2):
-        # THIS METHOD IS TRUE
         input = input.astype(float)
         u = len(gabor_list)
         v = len(gabor_list[0])
@@ -101,13 +85,6 @@ class Gabor:
 
         return octat_gabor
 
-    def gabor_response(self, input, kernel_size, f, theta):
-
-        im_filtered = np.zeros(input.shape, dtype='complex_')
-        im_filtered[:, :] = self._pixel_array_operation.convolution(input, self.gabor_kernel(kernel_size, f, theta))
-
-        return im_filtered
-
 
 class Gabor_information(Gabor, InformationTheory):
 
@@ -116,10 +93,6 @@ class Gabor_information(Gabor, InformationTheory):
         gabor_mi = self.mutual_information(gabor_pixel_data, octat_gabor)
 
         return gabor_mi
-
-    def gabor_entropy(self, input, gabor_pixel_data, a, b, scales, orientations):
-
-        return self.joint_entropy(gabor_pixel_data, self.gabor_8bit_respresentation(input, a, b, scales, orientations))
 
     def mutual_information_gabor_highest_intensity(self, input, step, scales, orientations, b_0=None, b_mean=None,
                                                    a_0=None):
@@ -182,14 +155,14 @@ class Gabor_information(Gabor, InformationTheory):
         for step in step_list:
             logger.debug("step during update  \n {}".format(step))
             mutual_info_right_array, b_step = self.mutual_information_gabor_highest_intensity(input, step, scales,
-                                                                                         orientations, b_0, b_mean,
-                                                                                         a_0)
+                                                                                              orientations, b_0, b_mean,
+                                                                                              a_0)
             max_ind = np.argmax(mutual_info_right_array)
             best_b = b_step[max_ind]
 
             mutual_info_left_array, a_step = self.mutual_information_gabor_lowest_intensity(input, step, scales,
-                                                                                       orientations, a_mean, a_0,
-                                                                                       best_b)
+                                                                                            orientations, a_mean, a_0,
+                                                                                            best_b)
             max_ind = np.argmax(mutual_info_left_array)
             best_a = a_step[max_ind]
 
@@ -208,7 +181,7 @@ class Gabor_information(Gabor, InformationTheory):
 class Data:
     def __init__(self, path):
         self._path = path
-        dicom_reader = pydicom.dcmread(path,force=True)
+        dicom_reader = pydicom.dcmread(path, force=True)
         self._pixel_data = dicom_reader.pixel_array
         self._gabor_information = Gabor_information()
         self._pixel_array_operation = PixelArrayOperation()

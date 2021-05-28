@@ -28,12 +28,8 @@ class PixelArrayOperation:
 
         return (np.clip(np.rint(normed), 0, 255)) / 255 * (int(image.max()) - int(image.min())) + int(image.min())
 
-    def convolution(oldimage, kernel):
-        return scipy.ndimage.correlate(oldimage, kernel, mode='constant')
-
 
 class InformationTheory:
-
     def entropy(self, input):
         histogram, bin_edges = np.histogram(input, bins=int(input.max()) - int(input.min()) + 1,
                                             range=(int(input.min()), int(input.max()) + 1))
@@ -53,9 +49,3 @@ class InformationTheory:
         mi = self.entropy(input) + self.entropy(dest_data) - self.joint_entropy(input, dest_data)
 
         return mi
-
-    def mutual_information_12_and_8bit(self, input, a, b):
-        octat_array = PixelArrayOperation.from12bitTo8bit(input, a, b)
-        octat_mi = self.mutual_information(input, octat_array)
-
-        return octat_mi
