@@ -56,7 +56,7 @@ def gabor_blank_filter(kernel_size, scales, orientation):
                     yprime = -np.sin(theta) * ((x + 1) - ((kernel_size + 1) / 2)) + np.cos(theta) * (
                                 (y + 1) - ((kernel_size + 1) / 2))
                     gabor_kernel[x, y] = np.around(np.exp(-((alpha ** 2) * (xprime ** 2) + (beta ** 2) * (yprime ** 2))) * (
-                                fi ** 2 / (pi * gamma * eta)) * np.exp(fi * np.pi * xprime * 2j), decimals = 4)
+                                fi ** 2 / (pi * gamma * eta)) * np.exp(fi * np.pi * xprime * 2j), decimals = 15)
             gabor_array[i][j] = gabor_kernel
     return gabor_array
 

@@ -4,7 +4,7 @@ import logging
 
 import numpy as np
 from math import sqrt, pi
-
+import scipy.ndimage
 import pydicom
 
 from Mapper.mathOperation import PixelArrayOperation
@@ -24,6 +24,8 @@ logger.setLevel(logging.DEBUG)
 
 
 class Gabor:
+    def __init__(self):
+        self._pixel_array_operation = PixelArrayOperation()
     def gabor_kernel(self, kernel_size, f, theta):
 
         gabor_kernel = np.zeros((kernel_size, kernel_size), dtype='complex_')
@@ -40,33 +42,51 @@ class Gabor:
         return gabor_kernel
 
     def gabor_blank_filter(self, kernel_size, scales, orientation):
-
         fmax = 0.25
-        gabor_list = []
+        gamma = sqrt(2)
+        eta = sqrt(2)
+        gabor_array = [[np.empty(0)] * orientation for i in range(scales)]
         for i in range(scales):
             fi = fmax / (sqrt(2) ** i)
+            alpha = fi / gamma
+            beta = fi / eta
             for j in range(orientation):
                 theta = pi * (j / orientation)
-                gabor_list.append(self.gabor_kernel(kernel_size, fi, theta))
-        return gabor_list
+                gabor_kernel = np.zeros((kernel_size, kernel_size), dtype='complex_')
+                for x in range(kernel_size):
+                    for y in range(kernel_size):
+                        xprime = np.cos(theta) * ((x + 1) - ((kernel_size + 1) / 2)) + np.sin(theta) * (
+                                (y + 1) - ((kernel_size + 1) / 2))
+                        yprime = -np.sin(theta) * ((x + 1) - ((kernel_size + 1) / 2)) + np.cos(theta) * (
+                                (y + 1) - ((kernel_size + 1) / 2))
+                        gabor_kernel[x, y] = np.around(
+                            np.exp(-((alpha ** 2) * (xprime ** 2) + (beta ** 2) * (yprime ** 2)), dtype=np.float16) * (
+                                    fi ** 2 / (pi * gamma * eta)) * np.exp(fi * np.pi * xprime * 2j), decimals=4)
+                gabor_array[i][j] = gabor_kernel
+        return gabor_array
 
     def gabor_feature(self, input, gabor_list, d1, d2):
-        gabor_result = []
-        for kernel in gabor_list:
-            im_filtered = np.zeros(input.shape, dtype='complex_')
-            im_filtered[:, :] = PixelArrayOperation.convolution(input[:, :], kernel)
-            gabor_result.append(im_filtered)
+        # THIS METHOD IS TRUE
+        input = input.astype(float)
+        u = len(gabor_list)
+        v = len(gabor_list[0])
+        gabor_result = [[np.empty(0)] * v for i in range(u)]
+        for i in range(u):
+            for j in range(v):
+                gabor_result[i][j] = scipy.ndimage.correlate(input, gabor_list[i][j], mode='constant')
         feature_vector = np.empty(0)
-        for res in gabor_result:
-            gabor_abs = abs(res)
-            feature_vector = np.append(feature_vector, gabor_abs[::d1, ::d2].reshape(-1))
+        for i in range(u):
+            for j in range(v):
+                gabor_abs = abs(gabor_result[i][j])
+                feature_vector = np.append(feature_vector, gabor_abs[::d1, ::d2].reshape(-1))
         return feature_vector
 
     def gabor_decomposition(self, input, scales, orientations, kernel_size=39, d1=1, d2=1):
         feature_size = scales * orientations
         gabor_list = self.gabor_blank_filter(kernel_size, scales, orientations)
-        feat_v = np.reshape(self.gabor_feature(input, gabor_list, d1, d2),
-                            (input.shape[0], input.shape[1], feature_size), order='F')
+        feature_vector = self.gabor_feature(input, gabor_list, d1, d2)
+        feat_v = np.reshape(feature_vector,
+                            (input.shape[0] // d1, input.shape[1] // d2, feature_size), order='F')
         for i in range(feature_size):
             max_feat = np.max(feat_v[:, :, i])
             if max_feat != 0.0:
@@ -76,15 +96,15 @@ class Gabor:
         return feat_v
 
     def gabor_8bit_respresentation(self, input, a, b, scales, orientations):
-        octat_array = PixelArrayOperation.from12bitTo8bit(input, a, b)
+        octat_array = self._pixel_array_operation.from12bitTo8bit(input, a, b)
         octat_gabor = self.gabor_decomposition(octat_array, scales, orientations)
 
         return octat_gabor
 
-    def gabor_response(self, kernel_size, f, theta):
+    def gabor_response(self, input, kernel_size, f, theta):
 
         im_filtered = np.zeros(input.shape, dtype='complex_')
-        im_filtered[:, :] = PixelArrayOperation.convolution(input[:, :], self.gabor_kernel(kernel_size, f, theta))
+        im_filtered[:, :] = self._pixel_array_operation.convolution(input, self.gabor_kernel(kernel_size, f, theta))
 
         return im_filtered
 
@@ -103,7 +123,6 @@ class Gabor_information(Gabor, InformationTheory):
 
     def mutual_information_gabor_highest_intensity(self, input, step, scales, orientations, b_0=None, b_mean=None,
                                                    a_0=None):
-
         if b_0 is None:
             b_0 = input.max()
         if a_0 is None:
@@ -127,7 +146,6 @@ class Gabor_information(Gabor, InformationTheory):
 
     def mutual_information_gabor_lowest_intensity(self, input, step, scales, orientations, a_mean=None, a_0=None,
                                                   b_0=None):
-
         if b_0 is None:
             b_0 = input.max()
         if a_0 is None:
@@ -150,8 +168,7 @@ class Gabor_information(Gabor, InformationTheory):
         return mutual_info_array, a_step
 
     def get_best_a_b(self, input, scales=3, orientations=6, delta=300, k_max=3):
-
-        step_list = PixelArrayOperation.make_step(delta, k_max)
+        step_list = self._pixel_array_operation.make_step(delta, k_max)
         logger.debug("Step List in get_best_a_b \n {} ".format(step_list))
         b_0 = input.max()  # bmax
         b_mean = round(np.mean(input))  # bmin
@@ -165,14 +182,14 @@ class Gabor_information(Gabor, InformationTheory):
         for step in step_list:
             logger.debug("step during update  \n {}".format(step))
             mutual_info_right_array, b_step = self.mutual_information_gabor_highest_intensity(input, step, scales,
-                                                                                              orientations, b_0, b_mean,
-                                                                                              a_0)
+                                                                                         orientations, b_0, b_mean,
+                                                                                         a_0)
             max_ind = np.argmax(mutual_info_right_array)
             best_b = b_step[max_ind]
 
             mutual_info_left_array, a_step = self.mutual_information_gabor_lowest_intensity(input, step, scales,
-                                                                                            orientations, a_mean, a_0,
-                                                                                            best_b)
+                                                                                       orientations, a_mean, a_0,
+                                                                                       best_b)
             max_ind = np.argmax(mutual_info_left_array)
             best_a = a_step[max_ind]
 
@@ -188,21 +205,24 @@ class Gabor_information(Gabor, InformationTheory):
         return best_a, best_b
 
 
-class Data(Gabor_information):
+class Data:
     def __init__(self, path):
         self._path = path
         dicom_reader = pydicom.dcmread(path,force=True)
         self._pixel_data = dicom_reader.pixel_array
+        self._gabor_information = Gabor_information()
+        self._pixel_array_operation = PixelArrayOperation()
 
     def get_pixel_data(self):
         return self._pixel_data
 
     def main(self):
         logger.debug("Pixel Data In Main \n {}".format(self._pixel_data))
-        a, b = self.get_best_a_b(self._pixel_data)
+        a, b = self._gabor_information.get_best_a_b(self._pixel_data)
         logger.debug("Best a and b \n {}  \n {}".format(a, b))
-        pixel_data = np.where(self._pixel_data > b, 255, self._pixel_data)
-        pixel_data = np.where(pixel_data < a, 0, pixel_data)
-        pixel_data = np.where(np.logical_and(pixel_data <= b, pixel_data >= a), (pixel_data - a) / (b - a) * 255,
-                              pixel_data)
+        WL = 0.5 * (b - a)
+        WW = b - a
+        L = 0.5 * (WL - WW)
+        H = 0.5 * (WL + WW)
+        pixel_data = self._pixel_array_operation.from12bitTo8bit(self._pixel_data, L, H)
         return pixel_data

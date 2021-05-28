@@ -11,6 +11,9 @@ from Mapper.DicomMapper import DicomMapper
 
 class ContrastAdjust(Resource):
 
+    def __init__(self):
+        self._preprocess = PreProcess()
+
     def post(self, contrast, brightness):
         # get the dicom file from post request
         parse = reqparse.RequestParser()
@@ -24,7 +27,7 @@ class ContrastAdjust(Resource):
 
         # process the pixel_data
         image = np.array(imageList)
-        output = PreProcess.ContrastAdjust(image, contrast, brightness)
+        output = self._preprocess.ContrastAdjust(image, contrast, brightness)
 
         # save the processed image to the dicom file
         DicomMapper.fromPixelToDicom(output, "temp.dcm")

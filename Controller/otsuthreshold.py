@@ -11,6 +11,9 @@ from Mapper.DicomMapper import DicomMapper
 
 class OtsuThreshold(Resource):
 
+    def __init__(self):
+        self._preprocess = PreProcess()
+
     def post(self, max):
         # get the dicom file from post request
         parse = reqparse.RequestParser()
@@ -24,7 +27,7 @@ class OtsuThreshold(Resource):
 
         # process the pixel_data
         image = np.array(imageList)
-        output = PreProcess.OtsuThresholding(image,max)
+        output = self._preprocess.OtsuThresholding(image,max)
 
         # save the processed image to the dicom file
         DicomMapper.fromPixelToDicom(output, "temp.dcm")

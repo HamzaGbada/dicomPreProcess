@@ -6,13 +6,13 @@ import numpy as np
 
 class PreProcess:
 
-    def OtsuThresholding(self, max):
+    def OtsuThresholding(self, pixel_array,max):
         """This function calculates the Otsu thresholding of the image in the Dicom file.
             For more information about the Otsu method see this link:
             https://en.wikipedia.org/wiki/Otsu%27s_method
 
         Args:
-            self: pixel_array in the Dicom file.
+            pixel_array: pixel_array in the Dicom file.
             max: Maximum value that can be assigned to a pixel.
 
         Returns:
@@ -21,12 +21,12 @@ class PreProcess:
         """
 
         # Number of pixels in an image
-        pixel_number = self.shape[0] * self.shape[1]
+        pixel_number = pixel_array.shape[0] * pixel_array.shape[1]
 
         mean_weight = 1.0 / pixel_number
 
         # Histogram Calculation
-        his, bins = np.histogram(self, np.arange(0, max + 1))
+        his, bins = np.histogram(pixel_array, np.arange(0, max + 1))
 
         # Initialization
         final_thresh = -1
@@ -55,33 +55,33 @@ class PreProcess:
                 final_thresh = t
                 final_value = value
 
-        final_img = self.copy()
+        final_img = pixel_array.copy()
 
         # Binarization
-        final_img[self > final_thresh] = max
-        final_img[self < final_thresh] = 0
+        final_img[pixel_array > final_thresh] = max
+        final_img[pixel_array < final_thresh] = 0
 
         return final_img
 
-    def GammaCorrection(self, gamma):
+    def GammaCorrection(self, pixel_array, gamma):
         """This function calculates the Gamma Correction of the image in the Dicom file.
             For more information about the Gamma Correction see this link:
             https://en.wikipedia.org/wiki/Gamma_correction
 
         Args:
-            self: pixel_array in the Dicom file.
+            pixel_array: pixel_array in the Dicom file.
             max: Maximum value that can be assigned to a pixel.
 
         Returns:
             The return value is the corrected image.
 
         """
-        image = np.power(self/float(4095), gamma)
+        image = np.power(pixel_array/float(4095), gamma)
         image = image*4095
 
         return image
 
-    def ContrastAdjust(self, contrast, brightness):
+    def ContrastAdjust(self, pixel_array, contrast, brightness):
         """This function used to adjust the contrast and the brightness
         the image in the Dicom file.
             This approach is based this equation that can be used to apply
@@ -101,7 +101,7 @@ class PreProcess:
                 beta = brightness - contrast
 
         Args:
-            self: pixel_array in the Dicom file.
+            pixel_array: pixel_array in the Dicom file.
             contrast: the contrast value to be applied.
             brightness: the brightness value to be applied.
 
@@ -109,7 +109,7 @@ class PreProcess:
             The return value is an image with different contrast and brightness.
 
         """
-        img = self.copy()
+        img = pixel_array.copy()
         quotient = 4095//2
         alpha = contrast / quotient + 1
         beta = brightness - contrast

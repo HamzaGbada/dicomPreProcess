@@ -11,6 +11,9 @@ from Mapper.DicomMapper import DicomMapper
 
 class GammaCorrection(Resource):
 
+    def __init__(self):
+        self._preprocess = PreProcess()
+
     def post(self, gamma):
         # get the dicom file from post request
         parse = reqparse.RequestParser()
@@ -24,7 +27,7 @@ class GammaCorrection(Resource):
 
         # process the pixel_data
         image = np.array(imageList)
-        output = PreProcess.GammaCorrection(image,gamma)
+        output = self._preprocess.GammaCorrection(image,gamma)
 
         # save the processed image to the dicom file
         DicomMapper.fromPixelToDicom(output, "temp.dcm")
