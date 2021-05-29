@@ -1,7 +1,7 @@
 #  أليلتنا بذي حسم انيري *** إذا انت انقضيت فلا تحوري
 #  فإن يكن بالذنائب طال ليلي *** فقد ابكي من الليل القصيري
 import logging
-
+import os
 import numpy as np
 from math import sqrt, pi
 import scipy.ndimage
@@ -52,8 +52,8 @@ class Gabor:
 
     def gabor_feature(self, input, gabor_list, d1, d2):
         input = input.astype(float)
-        u = len(gabor_list)
-        v = len(gabor_list[0])
+        u = gabor_list.shape[0]
+        v = gabor_list.shape[1]
         gabor_result = [[np.empty(0)] * v for i in range(u)]
         for i in range(u):
             for j in range(v):
@@ -67,7 +67,11 @@ class Gabor:
 
     def gabor_decomposition(self, input, scales, orientations, kernel_size=39, d1=1, d2=1):
         feature_size = scales * orientations
-        gabor_list = self.gabor_blank_filter(kernel_size, scales, orientations)
+        if not os.path.exists("gabor_array.npz"):
+            gabor = self.gabor_blank_filter(kernel_size, scales, orientations)
+            np.savez("gabor_array", x=gabor)
+        npzfile = np.load("gabor_array.npz")
+        gabor_list = npzfile["x"]
         feature_vector = self.gabor_feature(input, gabor_list, d1, d2)
         feat_v = np.reshape(feature_vector,
                             (input.shape[0] // d1, input.shape[1] // d2, feature_size), order='F')
@@ -105,7 +109,7 @@ class Gabor_information(Gabor, InformationTheory):
 
         a_k = a_0
         b_step = np.arange(b_0, b_mean - 1, -step)
-        pixel_data_gabor = self.gabor_decomposition(input, scales, orientations, 2, 1, 1)
+        pixel_data_gabor = self.gabor_decomposition(input, scales, orientations)
 
         mutual_info_array = np.empty(0)
 
@@ -128,7 +132,7 @@ class Gabor_information(Gabor, InformationTheory):
 
         b_k = b_0
         a_step = np.arange(a_0, a_mean + 1, step)
-        pixel_data_gabor = self.gabor_decomposition(input, scales, orientations, 2, 1, 1)
+        pixel_data_gabor = self.gabor_decomposition(input, scales, orientations)
 
         mutual_info_array = np.empty(0)
 
@@ -152,6 +156,8 @@ class Gabor_information(Gabor, InformationTheory):
         logger.debug("bmin before update \n {}".format(b_mean))
         logger.debug("amin before update \n {}".format(a_0))
         logger.debug("amax before update \n {}".format(a_mean))
+        a_init = a_0
+        b_init = b_0
         for step in step_list:
             logger.debug("step during update  \n {}".format(step))
             mutual_info_right_array, b_step = self.mutual_information_gabor_highest_intensity(input, step, scales,
@@ -165,7 +171,10 @@ class Gabor_information(Gabor, InformationTheory):
                                                                                             best_b)
             max_ind = np.argmax(mutual_info_left_array)
             best_a = a_step[max_ind]
-
+            if (a_init == best_a and b_init == best_b):
+                break
+            a_init = best_a
+            b_init = best_b
             a_0 = max(best_a - step, 0)
             a_mean = best_a + step
             b_mean = best_b - step
