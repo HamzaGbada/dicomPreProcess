@@ -6,11 +6,14 @@ import numpy as np
 from math import sqrt, pi
 import scipy.ndimage
 import pydicom
+from scipy import ndimage
 
 from Mapper.mathOperation import PixelArrayOperation
 from Mapper.mathOperation import InformationTheory
 
 # Create and configure logger
+from Service.PreProcessService import PreProcess
+
 logging.basicConfig(filename="newfile.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
@@ -194,6 +197,7 @@ class Data:
         self._pixel_data = dicom_reader.pixel_array
         self._gabor_information = Gabor_information()
         self._pixel_array_operation = PixelArrayOperation()
+        self._preprocess = PreProcess()
 
     def get_pixel_data(self):
         return self._pixel_data
@@ -208,3 +212,24 @@ class Data:
         H = 0.5 * (WL + WW)
         pixel_data = self._pixel_array_operation.from12bitTo8bit(self._pixel_data, L, H)
         return pixel_data
+
+    def main2(self, b):
+        if b == 0:
+            sigma1 = 2
+            sigma2 = 1.7
+            dog = self._preprocess.DoG(sigma1, sigma2)
+            fi = ndimage.correlate(self._pixel_data, dog, mode='constant')
+        elif b == 1:
+            sigma = 2
+            log = self._preprocess.LoG(sigma)
+            fi = ndimage.correlate(self._pixel_data, log, mode='constant')
+        else:
+            froi = self._pixel_array_operation.fft(self._pixel_data)
+            H = self._pixel_array_operation.butterworth_kernel(froi)
+            fi = self._pixel_array_operation.inverse_fft(froi * H)
+        fi = ndimage.median_filter(abs(fi), size=(5, 5))
+        fi = self._preprocess.GammaCorrection(fi, 1.25)
+        B = self._pixel_array_operation.binarize(fi, 1)
+        I = self._pixel_array_operation.morphoogy_closing(B)
+        b_f = self._pixel_array_operation.region_fill(I)
+        return b_f

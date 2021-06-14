@@ -24,7 +24,10 @@ pixelData = g.get_pixel_data()
 logger.debug("Pixel Data \n {}".format(pixelData))
 logger.debug("Pixel Data shape \n {}".format(pixelData.shape))
 
-x = g.main()
+# x = g.main()
+
+x = g.main2(1)
+
 plt.imshow(pixelData,cmap=plt.cm.gray)
 plt.show()
 plt.imshow(x,cmap=plt.cm.gray)

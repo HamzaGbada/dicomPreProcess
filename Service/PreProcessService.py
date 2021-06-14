@@ -6,7 +6,7 @@ import numpy as np
 
 class PreProcess:
 
-    def OtsuThresholding(self, pixel_array,max):
+    def OtsuThresholding(self, pixel_array, max):
         """This function calculates the Otsu thresholding of the image in the Dicom file.
             For more information about the Otsu method see this link:
             https://en.wikipedia.org/wiki/Otsu%27s_method
@@ -76,8 +76,8 @@ class PreProcess:
             The return value is the corrected image.
 
         """
-        image = np.power(pixel_array/float(4095), gamma)
-        image = image*4095
+        image = np.power(pixel_array / float(4095), gamma)
+        image = image * 4095
 
         return image
 
@@ -110,7 +110,7 @@ class PreProcess:
 
         """
         img = pixel_array.copy()
-        quotient = 4095//2
+        quotient = 4095 // 2
         alpha = contrast / quotient + 1
         beta = brightness - contrast
         img = img * alpha + beta
@@ -118,5 +118,30 @@ class PreProcess:
         img = np.clip(img, 0, 4095)
         return img
 
-    def contrast_approch(self):
-        pass
+    def gaussian(self, sigma):
+        filter_size = 11
+        gaussian_filter = np.zeros((filter_size, filter_size), np.float32)
+        m = filter_size // 2
+        n = filter_size // 2
+
+        for x in range(-m, m + 1):
+            for y in range(-n, n + 1):
+                gaussian_filter[x + m, y + n] = np.exp(-(x ** 2 + y ** 2) / (2 * sigma ** 2))
+
+        return gaussian_filter
+
+    def DoG(self, sigma1, sigma2):
+
+        return self.gaussian(sigma1) - self.gaussian(sigma2)
+
+    def LoG(self, sigma):
+        kernel = self.gaussian(sigma)
+        (m, n) = kernel.shape
+        m = m // 2
+        n = n // 2
+        for x in range(-m, m + 1):
+            for y in range(-n, n + 1):
+                x1 = ((2 * sigma ** 2) - x ** 2 - y ** 2) / sigma ** 4
+                kernel[x + m, y + n] = x1 * kernel[x + m, y + n]
+
+        return kernel
