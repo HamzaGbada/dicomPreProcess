@@ -199,8 +199,13 @@ class Data:
         self._pixel_array_operation = PixelArrayOperation()
         self._preprocess = PreProcess()
 
-    def get_pixel_data(self):
+    @property
+    def pixel_data(self):
         return self._pixel_data
+
+    @pixel_data.setter
+    def pixel_data(self, pixel_data):
+        self._pixel_data = pixel_data
 
     def main(self):
         logger.debug("Pixel Data In Main \n {}".format(self._pixel_data))
@@ -211,6 +216,7 @@ class Data:
         L = 0.5 * (WL - WW)
         H = 0.5 * (WL + WW)
         pixel_data = self._pixel_array_operation.from12bitTo8bit(self._pixel_data, L, H)
+        self.pixel_data = pixel_data
         return pixel_data
 
     def main2(self, b):
