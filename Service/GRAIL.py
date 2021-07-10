@@ -58,12 +58,10 @@ class Gabor:
         u = gabor_list.shape[0]
         v = gabor_list.shape[1]
         gabor_result = [[np.empty(0)] * v for i in range(u)]
-        for i in range(u):
-            for j in range(v):
-                gabor_result[i][j] = scipy.ndimage.correlate(input, gabor_list[i][j], mode='constant')
         feature_vector = np.empty(0)
         for i in range(u):
             for j in range(v):
+                gabor_result[i][j] = scipy.ndimage.correlate(input, gabor_list[i][j], mode='constant')
                 gabor_abs = abs(gabor_result[i][j])
                 feature_vector = np.append(feature_vector, gabor_abs[::d1, ::d2].reshape(-1))
         return feature_vector
@@ -207,7 +205,7 @@ class Data:
     def pixel_data(self, pixel_data):
         self._pixel_data = pixel_data
 
-    def main(self):
+    def grail_main(self):
         logger.debug("Pixel Data In Main \n {}".format(self._pixel_data))
         a, b = self._gabor_information.get_best_a_b(self._pixel_data)
         logger.debug("Best a and b \n {}  \n {}".format(a, b))
@@ -219,13 +217,13 @@ class Data:
         self.pixel_data = pixel_data
         return pixel_data
 
-    def main2(self, b):
-        if b == 0:
+    def fedbs_main(self, method_type):
+        if method_type == 0:
             sigma1 = 2
             sigma2 = 1.7
             dog = self._preprocess.DoG(sigma1, sigma2)
             fi = ndimage.correlate(self._pixel_data, dog, mode='constant')
-        elif b == 1:
+        elif method_type == 1:
             sigma = 2
             log = self._preprocess.LoG(sigma)
             fi = ndimage.correlate(self._pixel_data, log, mode='constant')

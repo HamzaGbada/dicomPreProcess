@@ -24,9 +24,9 @@ pixelData = g.pixel_data
 logger.debug("Pixel Data \n {}".format(pixelData))
 logger.debug("Pixel Data shape \n {}".format(pixelData.shape))
 
-x1 = g.main()
+x1 = g.grail_main()
 
-x = g.main2(2)
+x = g.fedbs_main(2)
 
 plt.imshow(pixelData,cmap=plt.cm.gray)
 plt.show()
