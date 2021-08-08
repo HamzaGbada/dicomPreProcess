@@ -7,6 +7,7 @@ from math import sqrt, pi
 import scipy.ndimage
 import pydicom
 from scipy import ndimage
+from skimage.filters import gabor
 
 from Mapper.mathOperation import PixelArrayOperation
 from Mapper.mathOperation import InformationTheory
@@ -29,7 +30,7 @@ class Gabor:
     def __init__(self):
         self._pixel_array_operation = PixelArrayOperation()
 
-    def gabor_blank_filter(self, kernel_size, scales, orientation):
+    def gabor_blank_filter(self, image, scales, orientation):
         fmax = 0.25
         gamma = sqrt(2)
         eta = sqrt(2)
@@ -40,42 +41,23 @@ class Gabor:
             beta = fi / eta
             for j in range(orientation):
                 theta = pi * (j / orientation)
-                gabor_kernel = np.zeros((kernel_size, kernel_size), dtype='complex_')
-                for x in range(kernel_size):
-                    for y in range(kernel_size):
-                        xprime = np.cos(theta) * ((x + 1) - ((kernel_size + 1) / 2)) + np.sin(theta) * (
-                                (y + 1) - ((kernel_size + 1) / 2))
-                        yprime = -np.sin(theta) * ((x + 1) - ((kernel_size + 1) / 2)) + np.cos(theta) * (
-                                (y + 1) - ((kernel_size + 1) / 2))
-                        gabor_kernel[x, y] = np.around(
-                            np.exp(-((alpha ** 2) * (xprime ** 2) + (beta ** 2) * (yprime ** 2)), dtype=np.float16) * (
-                                    fi ** 2 / (pi * gamma * eta)) * np.exp(fi * np.pi * xprime * 2j), decimals=15)
-                gabor_array[i][j] = gabor_kernel
-        return gabor_array
+                filt_real, filt_imag = gabor(image, fi, theta, sigma_x=alpha, sigma_y=beta)
+                gabor_out = np.absolute(filt_real + 1j * filt_imag)
+                gabor_array[i][j] = gabor_out
+        return np.array(gabor_array)
 
-    def gabor_feature(self, input, gabor_list, d1, d2):
+    def gabor_feature(self, input, scales, orientations, d1, d2):
         input = input.astype(float)
-        u = gabor_list.shape[0]
-        v = gabor_list.shape[1]
-        gabor_result = [[np.empty(0)] * v for i in range(u)]
         feature_vector = np.empty(0)
-        for i in range(u):
-            for j in range(v):
-                gabor_result[i][j] = scipy.ndimage.correlate(input, gabor_list[i][j], mode='constant')
-                gabor_abs = abs(gabor_result[i][j])
-                feature_vector = np.append(feature_vector, gabor_abs[::d1, ::d2].reshape(-1))
-        return feature_vector
+        gabor_abs = self.gabor_blank_filter(input, 3, 6)
+        for i in range(scales):
+            for j in range(orientations):
+                feature_vector = np.append(feature_vector, gabor_abs[i,j,::d1, ::d2].reshape(-1))
+        return np.reshape(feature_vector,(input.shape[0] // d1, input.shape[1] // d2, scales*orientations), order='F')
 
     def gabor_decomposition(self, input, scales, orientations, kernel_size=39, d1=1, d2=1):
         feature_size = scales * orientations
-        if not os.path.exists("gabor_array.npz"):
-            gabor = self.gabor_blank_filter(kernel_size, scales, orientations)
-            np.savez("gabor_array", x=gabor)
-        npzfile = np.load("gabor_array.npz")
-        gabor_list = npzfile["x"]
-        feature_vector = self.gabor_feature(input, gabor_list, d1, d2)
-        feat_v = np.reshape(feature_vector,
-                            (input.shape[0] // d1, input.shape[1] // d2, feature_size), order='F')
+        feat_v = self.gabor_feature(input, scales, orientations, d1, d2)
         for i in range(feature_size):
             max_feat = np.max(feat_v[:, :, i])
             if max_feat != 0.0:
