@@ -1,10 +1,8 @@
 #  أليلتنا بذي حسم انيري *** إذا انت انقضيت فلا تحوري
 #  فإن يكن بالذنائب طال ليلي *** فقد ابكي من الليل القصيري
 import logging
-import os
 import numpy as np
 from math import sqrt, pi
-import scipy.ndimage
 import pydicom
 from scipy import ndimage
 from skimage.filters import gabor
