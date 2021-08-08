@@ -88,9 +88,6 @@ class InformationTheory:
         return np.around(-np.sum(joint_prob * np.log2(joint_prob)), decimals=4)
 
     def mutual_information(self, input, dest_data):
-        input_f = input.flatten()
-        dest_f = input.flatten()
-        metrics.mutual_info_score(input_f, dest_f)
         mi = self.entropy(input) + self.entropy(dest_data) - self.joint_entropy(input, dest_data)
 
         return mi
