@@ -45,12 +45,14 @@ class Gabor:
         return np.array(gabor_array)
 
     def gabor_feature(self, input, scales, orientations, d1, d2):
+        logger.debug("gabor feature input \n {}".format(input))
         input = input.astype(float)
         feature_vector = np.empty(0)
         gabor_abs = self.gabor_blank_filter(input, 3, 6)
         for i in range(scales):
             for j in range(orientations):
                 feature_vector = np.append(feature_vector, gabor_abs[i,j,::d1, ::d2].reshape(-1))
+        logger.debug("gabor feature out shape\n {}".format(feature_vector.shape))
         return np.reshape(feature_vector,(input.shape[0] // d1, input.shape[1] // d2, scales*orientations), order='F')
 
     def gabor_decomposition(self, input, scales, orientations, kernel_size=39, d1=1, d2=1):
