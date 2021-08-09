@@ -1,4 +1,6 @@
 import logging
+
+from Mapper.mathOperation import PixelArrayOperation
 from Service.GRAIL import Data
 
 # Create and configure logger
@@ -24,11 +26,12 @@ pixelData = g.pixel_data
 logger.debug("Pixel Data \n {}".format(pixelData))
 logger.debug("Pixel Data shape \n {}".format(pixelData.shape))
 
+image = PixelArrayOperation.getROI(pixelData, 1250, 2000)
 x1 = g.grail_main()
 
-x = g.fedbs_main(0)
+x = g.fedbs_main(x1,0)
 
-plt.imshow(pixelData,cmap=plt.cm.gray)
+plt.imshow(image,cmap=plt.cm.gray)
 plt.show()
 plt.imshow(x1,cmap=plt.cm.gray)
 plt.show()
