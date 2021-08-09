@@ -199,7 +199,8 @@ class Data:
         H = 0.5 * (WL + WW)
         pixel_data = self._pixel_array_operation.from12bitTo8bit(self._pixel_data, L, H)
         im = Image.fromarray(pixel_data)
-        im.save("image.jpeg")
+        new = im.convert('RGB')
+        new.save("image.jpeg")
         return pixel_data
 
     def fedbs_main(self, image, method_type):
