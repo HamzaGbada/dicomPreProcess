@@ -6,6 +6,8 @@ from math import sqrt, pi
 import pydicom
 from scipy import ndimage
 from skimage.filters import gabor
+from PIL import Image
+
 
 from Mapper.mathOperation import PixelArrayOperation
 from Mapper.mathOperation import InformationTheory
@@ -196,8 +198,9 @@ class Data:
         L = 0.5 * (WL - WW)
         H = 0.5 * (WL + WW)
         pixel_data = self._pixel_array_operation.from12bitTo8bit(self._pixel_data, L, H)
-        image = PixelArrayOperation.getROI(pixel_data, 1250, 2000)
-        return image
+        im = Image.fromarray(pixel_data)
+        im.save("image.jpeg")
+        return pixel_data
 
     def fedbs_main(self, image, method_type):
         if method_type == 0:
