@@ -78,7 +78,9 @@ class Gabor:
 class Gabor_information(Gabor, InformationTheory):
 
     def gabor_mutual_information(self, input, gabor_pixel_data, a, b, scales, orientations):
-        octat_gabor = self.gabor_8bit_respresentation(input, a, b, scales, orientations)
+        WL = 0.5 * (b - a)
+        WW = b - a
+        octat_gabor = self.gabor_8bit_respresentation(input, WL, WW, scales, orientations)
         gabor_mi = self.mutual_information(gabor_pixel_data, octat_gabor)
 
         return gabor_mi
@@ -195,9 +197,9 @@ class Data:
         logger.debug("Best a and b \n {}  \n {}".format(a, b))
         WL = 0.5 * (b - a)
         WW = b - a
-        L = 0.5 * (WL - WW)
-        H = 0.5 * (WL + WW)
-        pixel_data = self._pixel_array_operation.from12bitTo8bit(self._pixel_data, L, H)
+        # L = 0.5 * (WL - WW)
+        # H = 0.5 * (WL + WW)
+        pixel_data = self._pixel_array_operation.from12bitTo8bit(self._pixel_data, WL, WW)
         im = Image.fromarray(pixel_data)
         new = im.convert('RGB')
         new.save("image.jpeg")
