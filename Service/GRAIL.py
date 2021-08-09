@@ -207,21 +207,21 @@ class Data:
 
     def fedbs_main(self, image, method_type):
         if method_type == 0:
-            sigma1 = 2
-            sigma2 = 1.7
-            dog = self._preprocess.DoG(sigma1, sigma2)
-            fi = ndimage.correlate(image, dog, mode='constant')
+            sigma1 = 1.7
+            sigma2 = 2
+            fi = self._preprocess.DoG(image, sigma1, sigma2)
         elif method_type == 1:
             sigma = 2
-            log = self._preprocess.LoG(sigma)
-            fi = ndimage.correlate(image, log, mode='constant')
+            fi = self._preprocess.LoG(image, sigma)
         else:
             froi = self._pixel_array_operation.fft(image)
             H = self._pixel_array_operation.butterworth_kernel(froi)
             fi = self._pixel_array_operation.inverse_fft(froi * H)
-        fi = ndimage.median_filter(abs(fi), size=(5, 5))
+        fi = ndimage.median_filter(abs(fi), size=(3, 3))
         fi = self._preprocess.GammaCorrection(fi, 1.25)
-        B = self._pixel_array_operation.binarize(fi, 1)
+        B = self._preprocess.OtsuThresholding(fi,1)
+        # B = self._preprocess.sauvola(fi, 1.25)
+        # B = self._pixel_array_operation.binarize(fi, 1)
         I = self._pixel_array_operation.morphoogy_closing(B)
         b_f = self._pixel_array_operation.region_fill(I)
         return b_f

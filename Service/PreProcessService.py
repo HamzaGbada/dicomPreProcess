@@ -2,6 +2,7 @@
 #  فإن يكن بالذنائب طال ليلي *** فقد ابكي من الليل القصيري
 
 import numpy as np
+from skimage.filters import gaussian, difference_of_gaussians, threshold_otsu, threshold_sauvola
 
 
 class PreProcess:
@@ -19,49 +20,11 @@ class PreProcess:
             The return value is the threshold image.
 
         """
+        x = threshold_otsu(pixel_array)
+        pixel_array[pixel_array < x] = 0
+        pixel_array[pixel_array > x] = 1
 
-        # Number of pixels in an image
-        pixel_number = pixel_array.shape[0] * pixel_array.shape[1]
-
-        mean_weight = 1.0 / pixel_number
-
-        # Histogram Calculation
-        his, bins = np.histogram(pixel_array, np.arange(0, max + 1))
-
-        # Initialization
-        final_thresh = -1
-        final_value = -1
-
-        for t in bins[1:-1]:
-
-            pc1 = np.sum(his[:t])
-            pc2 = np.sum(his[t:])
-
-            w1 = 1.0 / t
-            w2 = 1.0 / (max - t)
-
-            P1 = pc1 * mean_weight
-            P2 = pc2 * mean_weight
-
-            # Mean class calculation
-            mu1 = np.sum(his[:t]) / float(w1)
-            mu2 = np.sum(his[t:]) / float(w2)
-
-            # Interclass variance
-            value = P1 * P2 * (mu1 - mu2) ** 2
-
-            # Determination of the threshold
-            if value > final_value:
-                final_thresh = t
-                final_value = value
-
-        final_img = pixel_array.copy()
-
-        # Binarization
-        final_img[pixel_array > final_thresh] = max
-        final_img[pixel_array < final_thresh] = 0
-
-        return final_img
+        return pixel_array
 
     def GammaCorrection(self, pixel_array, gamma):
         """This function calculates the Gamma Correction of the image in the Dicom file.
@@ -118,30 +81,10 @@ class PreProcess:
         img = np.clip(img, 0, 4095)
         return img
 
-    def gaussian(self, sigma):
-        filter_size = 11
-        gaussian_filter = np.zeros((filter_size, filter_size), np.float32)
-        m = filter_size // 2
-        n = filter_size // 2
+    def DoG(self, img, sigma1, sigma2):
+        return difference_of_gaussians(img, sigma1, sigma2)
 
-        for x in range(-m, m + 1):
-            for y in range(-n, n + 1):
-                gaussian_filter[x + m, y + n] = np.exp(-(x ** 2 + y ** 2) / (2 * sigma ** 2))
-
-        return gaussian_filter
-
-    def DoG(self, sigma1, sigma2):
-
-        return self.gaussian(sigma1) - self.gaussian(sigma2)
-
-    def LoG(self, sigma):
-        kernel = self.gaussian(sigma)
-        (m, n) = kernel.shape
-        m = m // 2
-        n = n // 2
-        for x in range(-m, m + 1):
-            for y in range(-n, n + 1):
-                x1 = ((2 * sigma ** 2) - x ** 2 - y ** 2) / sigma ** 4
-                kernel[x + m, y + n] = x1 * kernel[x + m, y + n]
-
-        return kernel
+    def LoG(self, img, sigma):
+        return difference_of_gaussians(img, sigma)
+    def sauvola(self, image, gamma):
+        return threshold_sauvola(image, window_size=15, k=gamma)
