@@ -174,8 +174,7 @@ class Data:
     def __init__(self, path):
         self._path = path
         dicom_reader = pydicom.dcmread(path, force=True)
-        self.pixel_data = PixelArrayOperation.getROI(dicom_reader.pixel_array, 1250, 2000)
-        # self._pixel_data = dicom_reader.pixel_array
+        self._pixel_data = dicom_reader.pixel_array
         self._gabor_information = Gabor_information()
         self._pixel_array_operation = PixelArrayOperation()
         self._preprocess = PreProcess()
@@ -201,17 +200,18 @@ class Data:
         return pixel_data
 
     def fedbs_main(self, method_type):
+        image = PixelArrayOperation.getROI(self._pixel_data, 1250, 2000)
         if method_type == 0:
             sigma1 = 2
             sigma2 = 1.7
             dog = self._preprocess.DoG(sigma1, sigma2)
-            fi = ndimage.correlate(self._pixel_data, dog, mode='constant')
+            fi = ndimage.correlate(image, dog, mode='constant')
         elif method_type == 1:
             sigma = 2
             log = self._preprocess.LoG(sigma)
-            fi = ndimage.correlate(self._pixel_data, log, mode='constant')
+            fi = ndimage.correlate(image, log, mode='constant')
         else:
-            froi = self._pixel_array_operation.fft(self._pixel_data)
+            froi = self._pixel_array_operation.fft(image)
             H = self._pixel_array_operation.butterworth_kernel(froi)
             fi = self._pixel_array_operation.inverse_fft(froi * H)
         fi = ndimage.median_filter(abs(fi), size=(5, 5))
