@@ -26,9 +26,11 @@ logger.debug("Pixel Data shape \n {}".format(pixelData.shape))
 
 x1 = g.grail_main()
 
-x = g.fedbs_main(2)
+x = g.fedbs_main(0)
 
 plt.imshow(pixelData,cmap=plt.cm.gray)
+plt.show()
+plt.imshow(x1,cmap=plt.cm.gray)
 plt.show()
 plt.imshow(x,cmap=plt.cm.gray)
 plt.show()

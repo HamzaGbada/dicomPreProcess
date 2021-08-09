@@ -174,7 +174,8 @@ class Data:
     def __init__(self, path):
         self._path = path
         dicom_reader = pydicom.dcmread(path, force=True)
-        self._pixel_data = dicom_reader.pixel_array
+        self.pixel_data = PixelArrayOperation.getROI(dicom_reader.pixel_array, 1250, 2000)
+        # self._pixel_data = dicom_reader.pixel_array
         self._gabor_information = Gabor_information()
         self._pixel_array_operation = PixelArrayOperation()
         self._preprocess = PreProcess()

@@ -26,7 +26,7 @@ class PixelArrayOperation:
         b = local_variance ** 2 < (alpha * global_variance ** 2)
         return np.where(b, 0, 1)
 
-    def getROI(self, img, x, y, size=256):
+    def getROI(img, x, y, size=256):
         r = img[x - size:x + size + 1, y - size:y + size + 1]
         return r
 
