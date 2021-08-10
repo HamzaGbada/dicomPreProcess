@@ -206,7 +206,7 @@ class Data:
         return pixel_data
 
     def fedbs_main(self, method_type):
-        image = PixelArrayOperation.getROI(self.pixel_data, 1250, 2000)
+        image = PixelArrayOperation.getROI(self._pixel_data, 1250, 2000)
         if method_type == 0:
             sigma1 = 1.7
             sigma2 = 2
