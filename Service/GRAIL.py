@@ -200,12 +200,13 @@ class Data:
         # L = 0.5 * (WL - WW)
         # H = 0.5 * (WL + WW)
         pixel_data = self._pixel_array_operation.from12bitTo8bit(self._pixel_data, WL, WW)
-        im = Image.fromarray(pixel_data)
-        new = im.convert('RGB')
-        new.save("image.jpeg")
+        # im = Image.fromarray(pixel_data)
+        # new = im.convert('RGB')
+        # new.save("image.jpeg")
         return pixel_data
 
-    def fedbs_main(self, image, method_type):
+    def fedbs_main(self, method_type):
+        image = PixelArrayOperation.getROI(self.pixel_data, 1250, 2000)
         if method_type == 0:
             sigma1 = 1.7
             sigma2 = 2

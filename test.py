@@ -1,5 +1,5 @@
 import logging
-
+# TODO: check using OTSU+Variance methods
 from Mapper.mathOperation import PixelArrayOperation
 from Service.GRAIL import Data
 from PIL import Image, ImageOps
