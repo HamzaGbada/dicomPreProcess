@@ -6,8 +6,8 @@ from skimage.filters import gaussian, difference_of_gaussians, threshold_otsu, t
 
 
 class PreProcess:
-
-    def OtsuThresholding(self, pixel_array, max):
+    @staticmethod
+    def OtsuThresholding(pixel_array, output=None):
         """This function calculates the Otsu thresholding of the image in the Dicom file.
             For more information about the Otsu method see this link:
             https://en.wikipedia.org/wiki/Otsu%27s_method
@@ -20,13 +20,16 @@ class PreProcess:
             The return value is the threshold image.
 
         """
+        if output == None:
+            output = np.empty_like(pixel_array)
         x = threshold_otsu(pixel_array)
-        pixel_array[pixel_array < x] = 0
-        pixel_array[pixel_array > x] = 1
+        output[pixel_array < x] = 0
+        output[pixel_array > x] = 1
 
-        return pixel_array
+        return output
 
-    def GammaCorrection(self, pixel_array, gamma):
+    @staticmethod
+    def GammaCorrection(pixel_array, gamma):
         """This function calculates the Gamma Correction of the image in the Dicom file.
             For more information about the Gamma Correction see this link:
             https://en.wikipedia.org/wiki/Gamma_correction
@@ -44,7 +47,8 @@ class PreProcess:
 
         return image
 
-    def ContrastAdjust(self, pixel_array, contrast, brightness):
+    @staticmethod
+    def ContrastAdjust(pixel_array, contrast, brightness, output=None):
         """This function used to adjust the contrast and the brightness
         the image in the Dicom file.
             This approach is based this equation that can be used to apply
@@ -72,19 +76,24 @@ class PreProcess:
             The return value is an image with different contrast and brightness.
 
         """
-        img = pixel_array.copy()
+        if output == None:
+            output = pixel_array.copy()
         quotient = 4095 // 2
         alpha = contrast / quotient + 1
         beta = brightness - contrast
-        img = img * alpha + beta
+        output = output * alpha + beta
 
-        img = np.clip(img, 0, 4095)
-        return img
+        output = np.clip(output, 0, 4095)
+        return output
 
-    def DoG(self, img, sigma1, sigma2):
+    @staticmethod
+    def DoG(img, sigma1, sigma2):
         return difference_of_gaussians(img, sigma1, sigma2)
 
-    def LoG(self, img, sigma):
+    @staticmethod
+    def LoG(img, sigma):
         return difference_of_gaussians(img, sigma)
-    def sauvola(self, image, gamma):
+
+    @staticmethod
+    def sauvola(image, gamma):
         return threshold_sauvola(image, window_size=15, k=gamma)
