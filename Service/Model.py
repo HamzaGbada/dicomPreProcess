@@ -116,12 +116,12 @@ class Data:
     @staticmethod
     def fedbs_main(method_type, array):
         if method_type == Methode.DOG:
-            sigma1 = 2
-            sigma2 = 1.7
+            sigma1 = 1.7
+            sigma2 = 2
             fi = PreProcess.DoG(array, sigma1, sigma2)
         elif method_type == Methode.LOG:
             sigma = 2
-            log = PreProcess.LoG(array, sigma)
+            fi = PreProcess.LoG(array, sigma)
         elif method_type == Methode.FFT:
             froi = PixelArrayOperation.fft(array)
             H = PixelArrayOperation.butterworth_kernel(froi)

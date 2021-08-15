@@ -12,7 +12,7 @@ from Mapper.mathOperation import InformationTheory
 # Create and configure logger
 from Service.PreProcessService import PreProcess
 
-logging.basicConfig(filename="newfile.log",
+logging.basicConfig(filename="grail.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
 

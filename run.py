@@ -21,7 +21,7 @@ if __name__ == "__main__":
     logger.debug("Pixel Data \n {}".format(array))
     logger.debug("Pixel Data shape \n {}".format(image.shape))
 
-    grail_array = Data.grail_main(array)
-    fedbs_array = Data.fedbs_main(Methode.DOG, array)
+    # grail_array = Data.grail_main(array)
+    fedbs_array = Data.fedbs_main(Methode.FFT, array)
 
     Data.plot_image(fedbs_array)
