@@ -5,53 +5,58 @@ import numpy as np
 from scipy import ndimage
 
 
-
 class PixelArrayOperation:
-
-    def morphoogy_closing(self, b):
+    @staticmethod
+    def morphoogy_closing(b):
         return ndimage.binary_closing(b, structure=np.ones((7, 7))).astype(np.int)
 
-    def region_fill(self, b):
+    @staticmethod
+    def region_fill(b):
         return ndimage.binary_fill_holes(b, structure=np.ones((7, 7))).astype(int)
 
-    def fft(self, img):
+    @staticmethod
+    def fft(img):
         return np.fft.fft2(img)
 
-    def inverse_fft(self, img):
+    @staticmethod
+    def inverse_fft(img):
         return np.fft.ifft2(img)
 
-    def binarize(self, img, alpha):
-        local_variance = self.getLocalVariance(img, 5)
-        global_variance = self.variance(img)
+    @staticmethod
+    def binarize(img, alpha):
+        local_variance = PixelArrayOperation.getLocalVariance(img, 5)
+        global_variance = PixelArrayOperation.variance(img)
         b = local_variance ** 2 < (alpha * global_variance ** 2)
         return np.where(b, 0, 1)
 
+    @staticmethod
     def getROI(img, x, y, size=256):
         r = img[x - size:x + size + 1, y - size:y + size + 1]
         return r
 
-    def variance(self, img):
+    @staticmethod
+    def variance(img):
         return ndimage.variance(img)
 
-    def getLocalVariance(self, oldimage, kernel):
+    @staticmethod
+    def getLocalVariance(oldimage, kernel):
         return ndimage.generic_filter(oldimage, np.var, size=kernel)
 
-    def butterworth_kernel(self, img, D_0=21, W=32, n=3):
-        m = img.shape[0]
-        n = img.shape[1]
-        u = np.arange(m)
-        v = np.arange(n)
-        u, v = np.meshgrid(u, v)
-        D = np.sqrt((u - m / 2) ** 2 + (v - n / 2) ** 2)
+    @staticmethod
+    def butterworth_kernel(img, D_0=21, W=32, n=3):
+        x = img.shape[0]
+        y = img.shape[1]
+        u, v = np.meshgrid(np.arange(x), np.arange(y))
+        D = np.sqrt((u - x / 2) ** 2 + (v - y / 2) ** 2)
         band_pass = D ** 2 - D_0 ** 2
         cuttoff = W * D
         denom = 1.0 + (band_pass / cuttoff) ** (2 * n)
         band_pass = 1.0 / denom
         return band_pass.transpose()
 
-    def make_step(self, delta, k_max):
-        step_list = []
-        step_list.append(delta)
+    @staticmethod
+    def make_step(delta, k_max):
+        step_list = [delta]
         for s in range(k_max - 1):
             delta //= 10
             if delta % 1 != 0:
@@ -59,7 +64,8 @@ class PixelArrayOperation:
             step_list.append(delta)
         return step_list
 
-    def from12bitTo8bit(self, image, a, b):
+    @staticmethod
+    def from12bitTo8bit(image, a, b):
         if a == b:
             if a == 0:
                 normed = image * 255
@@ -72,7 +78,8 @@ class PixelArrayOperation:
 
 
 class InformationTheory:
-    def entropy(self, input):
+    @staticmethod
+    def entropy(input):
         histogram, bin_edges = np.histogram(input, bins=int(input.max()) - int(input.min()) + 1,
                                             range=(int(input.min()), int(input.max()) + 1))
         probabilities = histogram / input.size
@@ -80,14 +87,16 @@ class InformationTheory:
 
         return np.around(-np.sum(probabilities * np.log2(probabilities)), decimals=4)
 
-    def joint_entropy(self, input, dest_data):
+    @staticmethod
+    def joint_entropy(input, dest_data):
         joint_histogram, _, _ = np.histogram2d(input.flatten(), dest_data.flatten())
         joint_histogram_without_zero = joint_histogram[joint_histogram != 0]
         joint_prob = joint_histogram_without_zero / dest_data.size
 
         return np.around(-np.sum(joint_prob * np.log2(joint_prob)), decimals=4)
 
-    def mutual_information(self, input, dest_data):
-        mi = self.entropy(input) + self.entropy(dest_data) - self.joint_entropy(input, dest_data)
+    @staticmethod
+    def mutual_information(input, dest_data):
+        mi = InformationTheory.entropy(input) + InformationTheory.entropy(dest_data) - InformationTheory.joint_entropy(input, dest_data)
 
         return mi

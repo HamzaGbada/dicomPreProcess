@@ -11,15 +11,11 @@ from Service.GRAIL import Gabor_information
 from Mapper.mathOperation import PixelArrayOperation
 from Service.PreProcessService import PreProcess
 
-# Create and configure logger
-logging.basicConfig(filename="newfile.log",
+logging.basicConfig(filename="grail.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
 
-# Creating an object
 logger = logging.getLogger()
-
-# Setting the threshold of logger to DEBUG
 logger.setLevel(logging.DEBUG)
 
 
@@ -34,6 +30,10 @@ class Format(enum.Enum):
     GRAY = 1
     RGB = 3
 
+class Methode(enum.Enum):
+    DOG = 0
+    LOG = 1
+    FFT = 2
 
 class Image:
     def __init__(self, array, array_bits):
@@ -115,16 +115,14 @@ class Data:
 
     @staticmethod
     def fedbs_main(method_type, array):
-        if method_type == 0:
+        if method_type == Methode.DOG:
             sigma1 = 2
             sigma2 = 1.7
-            dog = PreProcess.DoG(sigma1, sigma2)
-            fi = ndimage.correlate(array, dog, mode='constant')
-        elif method_type == 1:
+            fi = PreProcess.DoG(array, sigma1, sigma2)
+        elif method_type == Methode.LOG:
             sigma = 2
-            log = PreProcess.LoG(sigma)
-            fi = ndimage.correlate(array, log, mode='constant')
-        else:
+            log = PreProcess.LoG(array, sigma)
+        elif method_type == Methode.FFT:
             froi = PixelArrayOperation.fft(array)
             H = PixelArrayOperation.butterworth_kernel(froi)
             fi = PixelArrayOperation.inverse_fft(froi * H)

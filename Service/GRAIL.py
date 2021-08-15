@@ -3,10 +3,7 @@
 import logging
 import numpy as np
 from math import sqrt, pi
-import pydicom
-from scipy import ndimage
 from skimage.filters import gabor
-from PIL import Image
 
 
 from Mapper.mathOperation import PixelArrayOperation
@@ -27,8 +24,6 @@ logger.setLevel(logging.DEBUG)
 
 
 class Gabor:
-    def __init__(self):
-        self._pixel_array_operation = PixelArrayOperation()
 
     @staticmethod
     def gabor_blank_filter(image,  scales, orientation, output=None):
@@ -179,57 +174,3 @@ class Gabor_information:
             logger.debug("amax during update \n {}".format(a_mean))
 
         return best_a, best_b
-
-
-class Data:
-    def __init__(self, path):
-        self._path = path
-        dicom_reader = pydicom.dcmread(path, force=True)
-        self._pixel_data = dicom_reader.pixel_array
-        self._gabor_information = Gabor_information()
-        self._pixel_array_operation = PixelArrayOperation()
-        self._preprocess = PreProcess()
-
-    @property
-    def pixel_data(self):
-        return self._pixel_data
-
-    @pixel_data.setter
-    def pixel_data(pixel_data):
-        self._pixel_data = pixel_data
-
-    def grail_main(self):
-        logger.debug("Pixel Data In Main \n {}".format(self._pixel_data))
-        a, b = self._gabor_information.get_best_a_b(self._pixel_data)
-        logger.debug("Best a and b \n {}  \n {}".format(a, b))
-        WL = 0.5 * (b - a)
-        WW = b - a
-        # L = 0.5 * (WL - WW)
-        # H = 0.5 * (WL + WW)
-        pixel_data = self._pixel_array_operation.from12bitTo8bit(self._pixel_data, WL, WW)
-        # im = Image.fromarray(pixel_data)
-        # new = im.convert('RGB')
-        # new.save("image.jpeg")
-        return pixel_data
-
-    def fedbs_main(method_type):
-        image = PixelArrayOperation.getROI(self._pixel_data, 1250, 2000)
-        if method_type == 0:
-            sigma1 = 1.7
-            sigma2 = 2
-            fi = self._preprocess.DoG(image, sigma1, sigma2)
-        elif method_type == 1:
-            sigma = 2
-            fi = self._preprocess.LoG(image, sigma)
-        else:
-            froi = self._pixel_array_operation.fft(image)
-            H = self._pixel_array_operation.butterworth_kernel(froi)
-            fi = self._pixel_array_operation.inverse_fft(froi * H)
-        fi = ndimage.median_filter(abs(fi), size=(3, 3))
-        fi = self._preprocess.GammaCorrection(fi, 1.25)
-        B = self._preprocess.OtsuThresholding(fi,1)
-        # B = self._preprocess.sauvola(fi, 1.25)
-        # B = self._pixel_array_operation.binarize(fi, 1)
-        I = self._pixel_array_operation.morphoogy_closing(B)
-        b_f = self._pixel_array_operation.region_fill(I)
-        return b_f
