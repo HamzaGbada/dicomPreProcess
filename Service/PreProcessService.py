@@ -21,12 +21,12 @@ class PreProcess:
 
         """
         if output == None:
-            output = np.empty_like(pixel_array)
+            output = np.copy(pixel_array)
         x = threshold_otsu(pixel_array)
-        output[pixel_array < x] = 0
-        output[pixel_array > x] = 1
+        pixel_array[pixel_array < x] = 0
+        pixel_array[pixel_array > x] = 1
 
-        return output
+        return pixel_array
 
     @staticmethod
     def GammaCorrection(pixel_array, gamma):

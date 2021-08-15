@@ -128,7 +128,8 @@ class Data:
             fi = PixelArrayOperation.inverse_fft(froi * H)
         fi = ndimage.median_filter(abs(fi), size=(5, 5))
         fi = PreProcess.GammaCorrection(fi, 1.25)
-        B = PixelArrayOperation.binarize(fi, 1)
+        # B = PixelArrayOperation.binarize(fi, 1)
+        B = PreProcess.OtsuThresholding(fi,1)
         I = PixelArrayOperation.morphoogy_closing(B)
         b_f = PixelArrayOperation.region_fill(I)
         return b_f
