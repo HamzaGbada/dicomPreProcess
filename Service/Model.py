@@ -108,9 +108,9 @@ class Data:
         logger.debug("Best a and b \n {}  \n {}".format(a, b))
         WL = 0.5 * (b - a)
         WW = b - a
-        # L = 0.5 * (WL - WW)
-        # H = 0.5 * (WL + WW)
-        pixel_data = PixelArrayOperation.from12bitTo8bit(array, WL, WW)
+        L = 0.5 * (WL - WW)
+        H = 0.5 * (WL + WW)
+        pixel_data = PixelArrayOperation.from12bitTo8bit(array, L, H)
         return pixel_data
 
     @staticmethod
