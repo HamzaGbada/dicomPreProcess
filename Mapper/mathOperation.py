@@ -42,22 +42,23 @@ class PixelArrayOperation:
     def getLocalVariance(oldimage, kernel):
         return ndimage.generic_filter(oldimage, np.var, size=kernel)
 
-    # @staticmethod
-    # def butterworth_kernel(img, D_0=21, W=32, n=3):
-    #     x = img.shape[0]
-    #     y = img.shape[1]
-    #     u, v = np.meshgrid(np.arange(x), np.arange(y))
-    #     D = np.sqrt((u - x / 2) ** 2 + (v - y / 2) ** 2)
-    #     band_pass = D ** 2 - D_0 ** 2
-    #     cuttoff = W * D
-    #     denom = 1.0 + (band_pass / cuttoff) ** (2 * n)
-    #     band_pass = 1.0 / denom
-    #     return band_pass.transpose()
     @staticmethod
     def butterworth_kernel(img, D_0=21, W=32, n=3):
-        high = butterworth(img, D_0, True, order=n)
-        low = butterworth(high, W, False, order=n)
-        return low
+        x = img.shape[0]
+        y = img.shape[1]
+        u, v = np.meshgrid(np.arange(x), np.arange(y))
+        D = np.sqrt((u - x / 2) ** 2 + (v - y / 2) ** 2)
+        band_pass = D ** 2 - D_0 ** 2
+        cuttoff = 8 * W * D
+        print(cuttoff.shape)
+        denom = 1.0 + (band_pass / cuttoff) ** (2 * n)
+        band_pass = 1.0 / denom
+        return band_pass.transpose()
+    # @staticmethod
+    # def butterworth_kernel(img, D_0=21, W=32, n=3):
+    #     # high = butterworth(img, 1/D_0, True, order=n)
+    #     low = butterworth(img, 1/D_0, False, order=n)
+    #     return low
 
     @staticmethod
     def make_step(delta, k_max):

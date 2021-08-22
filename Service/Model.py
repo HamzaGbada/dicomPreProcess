@@ -10,6 +10,7 @@ import logging
 from Service.GRAIL import Gabor_information
 from Mapper.mathOperation import PixelArrayOperation
 from Service.PreProcessService import PreProcess
+import numpy as np
 
 logging.basicConfig(filename="grail.log",
                     format='%(asctime)s %(message)s',
@@ -125,11 +126,13 @@ class Data:
         elif method_type == Methode.FFT:
             froi = PixelArrayOperation.fft(array)
             H = PixelArrayOperation.butterworth_kernel(froi)
-            fi = PixelArrayOperation.inverse_fft(froi * H)
+            fi = PixelArrayOperation.inverse_fft(np.multiply(froi, H))
         fi = ndimage.median_filter(abs(fi), size=(5, 5))
         fi = PreProcess.GammaCorrection(fi, 1.25)
-        # B = PixelArrayOperation.binarize(fi, 1)
-        B = PreProcess.OtsuThresholding(fi,1)
+        if method_type == Methode.FFT:
+            B = PixelArrayOperation.binarize(fi, 1)
+        else:
+            B = PreProcess.OtsuThresholding(fi)
         I = PixelArrayOperation.morphoogy_closing(B)
         b_f = PixelArrayOperation.region_fill(I)
         return b_f
