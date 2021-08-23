@@ -26,7 +26,33 @@ logger.setLevel(logging.DEBUG)
 class Gabor:
 
     @staticmethod
-    def gabor_blank_filter(image,  scales, orientation, output=None):
+    def gabor_blank_filter(input,  scales, orientation, output=None):
+        """
+        Generates a custum Gabor filter.
+        It creates a tensor with shape = (scales, orientation, input.shape[0], input.shape[1]).
+        Each matrix being a 2-D image filtered by Gabor filter.
+        For more about Gabor filter check this:
+            https://en.wikipedia.org/wiki/Gabor_filter
+
+        Parameters:
+            input: 2d ndarray to process.
+            scales: int
+                    number of scales (frequencies)
+            orientation: int
+                         number of orientations
+            output: the output ndarray (optional)
+
+
+        Returns:
+            output : a tensor (ndarray) with shape = (scales, orientation, input.shape[0], input.shape[1])
+
+
+        Examples:
+            >>> a = np.random.randint(0, 5, (9,9))
+            >>> gabor = Gabor.gabor_blank_filter(a, 2, 3)
+            >>> gabor.shape
+            (2,3,9,9)
+        """
         fmax = 0.25
         gamma = sqrt(2)
         eta = sqrt(2)
@@ -38,13 +64,43 @@ class Gabor:
             beta = fi / eta
             for j in range(orientation):
                 theta = pi * (j / orientation)
-                filt_real, filt_imag = gabor(image, fi, theta, sigma_x=alpha, sigma_y=beta)
+                filt_real, filt_imag = gabor(input, fi, theta, sigma_x=alpha, sigma_y=beta)
                 gabor_out = np.absolute(filt_real + 1j * filt_imag)
                 output[i][j] = gabor_out
         return np.array(output)
 
     @staticmethod
     def gabor_feature(input, scales, orientations, d1, d2, output=None):
+        """
+        Extracts the Gabor features of an input image.
+        It creates a column vector, consisting of the Gabor features of the input image.
+        For more about Gabor feature extraction check this:
+            https://ucanr.edu/sites/Postharvest_Technology_Center_/files/231275.pdf
+
+        Parameters:
+            input: 2d ndarray to process.
+            scales: int
+                    number of scales (frequencies)
+            orientation: int
+                         number of orientations
+            d1: int
+                The factor of downsampling along rows.
+            d2: int
+                The factor of downsampling along columns.
+
+            output: the output ndarray (optional)
+
+
+        Returns:
+            output : A ndarray vector with shape = (input.shape[0], input.shape[1], (scales * orientations) / (d1 * d2)).
+
+
+        Examples:
+            >>> a = np.random.randint(0, 5, (9,9))
+            >>> gabor = Gabor.gabor_feature(a, 2, 3, 1, 1)
+            >>> gabor.shape
+            (9, 9, 6)
+        """
         logger.debug("gabor feature input \n {}".format(input))
         input = input.astype(float)
         if output == None:
