@@ -1,3 +1,6 @@
+#  عسى وعسى يثني الزمان عنانه *** بتصريف حال والزمان عثور
+#  فتقضى لبانات وتشفى حزائز *** وتحدث من بعد الأمور أمور
+# الفضل بن الربيع
 from math import sin, cos, pi
 from cmath import exp, sqrt
 from operator import pow
@@ -110,10 +113,3 @@ class GaborGPU:
 
         return k1
 
-    def get_gabor(self):
-        g_kernel = [[np.zeros((39, 39), np.complex128)] * 6 for i in range(3)]
-        gabor_kernel = np.asarray(g_kernel)
-        d_gabor_kernel = cuda.to_device(gabor_kernel)
-        self.gabor_blank_filter_gpu[(39, 3), (39, 6)](39, 3, 6, d_gabor_kernel)
-        kernel = d_gabor_kernel.copy_to_host()
-        return kernel
