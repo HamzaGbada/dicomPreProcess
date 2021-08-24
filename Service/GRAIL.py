@@ -114,6 +114,32 @@ class Gabor:
 
     @staticmethod
     def gabor_decomposition(input, scales, orientations, d1=1, d2=1):
+        """
+        Obtains the Gabor feature vector of an input image.
+        For more about Gabor decomposition check this:
+            https://ucanr.edu/sites/Postharvest_Technology_Center_/files/231275.pdf
+
+        Parameters:
+            input: 2d ndarray to process.
+            scales: int
+                    number of scales (frequencies)
+            orientation: int
+                         number of orientations
+            d1: int
+                The factor of downsampling along rows.
+            d2: int
+                The factor of downsampling along columns.
+
+        Returns:
+            output : A ndarray vector with shape = (input.shape[0], input.shape[1], (scales * orientations) / (d1 * d2)).
+
+
+        Examples:
+            >>> a = np.random.randint(0, 5, (9,9))
+            >>> gabor = Gabor.gabor_decomposition(a, 2, 3, 1, 1)
+            >>> gabor.shape
+            (9, 9, 6)
+        """
         feature_size = scales * orientations
         feat_v = Gabor.gabor_feature(input, scales, orientations, d1, d2)
         for i in range(feature_size):
@@ -125,6 +151,24 @@ class Gabor:
 
     @staticmethod
     def gabor_8bit_respresentation(input, a, b, scales, orientations):
+        """
+        Obtains the gabor decomposition of an image by previously translating it
+         to 8 bit using an intensity window.
+
+        Parameters:
+            input: 2d ndarray to process.
+            a: int
+                lowest intensity limit.
+            b: int
+                highest intensity limit.
+            scales: int
+                    number of scales (frequencies)
+            orientation: int
+                    number of orientations
+
+        Returns:
+            octat_gabor : A ndarray vector with shape = (input.shape[0], input.shape[1], (scales * orientations) / (d1 * d2)).
+        """
         octat_array = PixelArrayOperation.from12bitTo8bit(input, a, b)
         octat_gabor = Gabor.gabor_decomposition(octat_array, scales, orientations)
 
@@ -135,6 +179,26 @@ class Gabor_information:
 
     @staticmethod
     def gabor_mutual_information(input, gabor_pixel_data, a, b, scales, orientations):
+        """
+        This function calculates the mutual information between a 12 bit image
+        and its 8 bit representation for an intensity window limited by a and b.
+
+        Parameters:
+            input: 2d ndarray to process.
+            a: int
+                lowest intensity limit.
+            b: int
+                highest intensity limit.
+            scales: int
+                    number of scales (frequencies)
+            orientation: int
+                    number of orientations
+
+        Returns:
+           gabor_mi: float
+                    The mutual information between a 12 bit image
+                    and its 8 bit representation.
+        """
         octat_gabor = Gabor.gabor_8bit_respresentation(input, a, b, scales, orientations)
         gabor_mi = InformationTheory.mutual_information(gabor_pixel_data, octat_gabor)
 
@@ -143,6 +207,29 @@ class Gabor_information:
     @staticmethod
     def mutual_information_gabor_highest_intensity(input, step, scales, orientations, b_0=None, b_mean=None,
                                                    a_0=None):
+        """
+        This function performs the GRAIL algorithm
+        starting with the highest intensity and continuing downwards.
+        For more about GRAIL algorithm check this:
+            https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.12144
+        Parameters:
+            input: 2d ndarray to process.
+            step: int
+                window step.
+            scales: int
+                number of scales (frequencies)
+            orientations: int
+                number of orientations
+            b_0: int
+                rightmost intensity limit.
+            b_mean: int
+                leftmost intensity limit
+            a_0: int
+                lowest intensity limit
+
+        Returns:
+           mutual_info_array, b_step: array of obtained mutual informations for each intensity window
+        """
         if b_0 is None:
             b_0 = input.max()
         if a_0 is None:
@@ -167,6 +254,29 @@ class Gabor_information:
     @staticmethod
     def mutual_information_gabor_lowest_intensity(input, step, scales, orientations, a_mean=None, a_0=None,
                                                   b_0=None):
+        """
+        This function performs the GRAIL algorithm
+        starting with the lowest intensity and continuing upwards.
+        For more about GRAIL algorithm check this:
+            https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.12144
+        Parameters:
+            input: 2d ndarray to process.
+            step: int
+                window step.
+            scales: int
+                number of scales (frequencies)
+            orientation: int
+                number of orientations
+            a_mean: int
+                rightmost intensity limit.
+            a_0: int
+                leftmost intensity limit
+            b_0: int
+                highest intensity limit
+
+        Returns:
+           mutual_info_array, b_step: array of obtained mutual informations for each intensity window
+        """
         if b_0 is None:
             b_0 = input.max()
         if a_0 is None:
@@ -190,6 +300,27 @@ class Gabor_information:
 
     @staticmethod
     def get_best_a_b(input, scales=3, orientations=6, delta=300, k_max=3):
+        """
+        This function is the main Grail algorithm. It finds the min and max intensity value
+        of a mammogram based on a perceptual matric which combines mutual information
+        and Gabor filtering.
+        For more about GRAIL algorithm check this:
+            https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.12144
+        Parameters:
+            input: 2d ndarray to process.
+            scales: int
+                number of scales (frequencies)
+            orientation: int
+                number of orientations
+            delta: int
+                initial search span.
+            k_max: int
+                maximum number of iterations.
+
+
+        Returns:
+           best_a, best_b: the min and max optimal intensity values.
+        """
         step_list = PixelArrayOperation.make_step(delta, k_max)
         logger.debug("Step List in get_best_a_b \n {} ".format(step_list))
         b_0 = input.max()  # bmax
