@@ -302,7 +302,7 @@ class Gabor_information:
     def get_best_a_b(input, scales=3, orientations=6, delta=300, k_max=3):
         """
         This function is the main Grail algorithm. It finds the min and max intensity value
-        of a mammogram based on a perceptual matric which combines mutual information
+        of a mammogram based on a perceptual metric which combines mutual information
         and Gabor filtering.
         For more about GRAIL algorithm check this:
             https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.12144

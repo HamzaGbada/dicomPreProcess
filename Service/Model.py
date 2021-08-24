@@ -104,6 +104,18 @@ class Data:
 
     @staticmethod
     def grail_main(array):
+        """
+        This function is the main Grail algorithm. It finds the min and max intensity value
+        of a mammogram based on a perceptual metric which combines mutual information
+        and Gabor filtering.
+        For more about GRAIL algorithm check this:
+            https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.12144
+        Parameters:
+            array: 2d ndarray to process.
+
+        Returns:
+           pixel_data: the new array after quality adjustment.
+        """
         logger.debug("Pixel Data In Main \n {}".format(array))
         a, b = Gabor_information.get_best_a_b(array)
         logger.debug("Best a and b \n {}  \n {}".format(a, b))
@@ -116,6 +128,18 @@ class Data:
 
     @staticmethod
     def fedbs_main(method_type, array):
+        """
+        This function is the main FEDBS algorithm. It binarize mammogram to make
+        micro-calcification appear.
+        For more about FEDBS algorithm check this:
+            https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.12144
+        Parameters:
+            method_type: Enum
+            array: 2d ndarray to process.
+
+        Returns:
+           b_f: a binary array.
+        """
         if method_type == Methode.DOG:
             sigma1 = 1.7
             sigma2 = 2
