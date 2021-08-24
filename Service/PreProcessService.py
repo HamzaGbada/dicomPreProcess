@@ -87,13 +87,61 @@ class PreProcess:
         return output
 
     @staticmethod
-    def DoG(img, sigma1, sigma2):
-        return difference_of_gaussians(img, sigma1, sigma2)
+    def DoG(input, sigma1, sigma2):
+        """
+        This function uses the Difference of Gaussian method for applying
+        band-pass filters to multi-dimensional arrays.
+        For more check this:
+            https://www.researchgate.net/publication/306253912_Mammograms_calcifications_segmentation_based_on_band-pass_Fourier_filtering_and_adaptive_statistical_thresholding
+        Parameters:
+            input: ndarray
+                Input array to filter.
+            sigma1: float
+                Standard deviation(s) for the Gaussian kernel with the smaller sigmas
+                across all axes.
+            sigma2: float
+                Standard deviation(s) for the Gaussian kernel with the larger sigmas
+                across all axes.
+
+        Returns:
+           ndarray
+           the filtered array.
+        """
+        return difference_of_gaussians(input, sigma1, sigma2)
 
     @staticmethod
-    def LoG(img, sigma):
-        return difference_of_gaussians(img, sigma)
+    def LoG(input, sigma):
+        """
+        This function uses the Laplacian of Gaussian method for applying
+        band-pass filters to multi-dimensional arrays.
+        For more check this:
+            https://www.researchgate.net/publication/306253912_Mammograms_calcifications_segmentation_based_on_band-pass_Fourier_filtering_and_adaptive_statistical_thresholding
+        Parameters:
+            input: ndarray
+                Input array to filter.
+            sigma: float
+                Standard deviation(s) for the Gaussian kernel with the smaller sigmas
+                across all axes.
+
+        Returns:
+           ndarray
+           the filtered array.
+        """
+        return difference_of_gaussians(input, sigma)
 
     @staticmethod
     def sauvola(image, gamma):
+        """
+        This function applies Sauvola local threshold to an array.
+        For more check this:
+            https://www.researchgate.net/publication/306253912_Mammograms_calcifications_segmentation_based_on_band-pass_Fourier_filtering_and_adaptive_statistical_thresholding
+        Parameters:
+            input: ndarray
+                Input array to filter.
+            gamma: float
+
+        Returns:
+           ndarray
+           the filtered array.
+        """
         return threshold_sauvola(image, window_size=15, k=gamma)
