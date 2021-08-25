@@ -2,7 +2,7 @@
 #  فإن يكن بالذنائب طال ليلي *** فقد ابكي من الليل القصيري
 
 import numpy as np
-from skimage.filters import gaussian, difference_of_gaussians, threshold_otsu, threshold_sauvola
+from skimage.filters import difference_of_gaussians, threshold_otsu, threshold_sauvola
 
 
 class PreProcess:

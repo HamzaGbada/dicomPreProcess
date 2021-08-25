@@ -4,3 +4,7 @@ Flask~=1.1.2
 Werkzeug~=1.0.1
 Flask-RESTful~=0.3.8
 Flask-Cors~=1.10.2
+scikit-image~=0.18.3
+numba~=0.54.0
+matplotlib~=3.4.3
+scipy~=1.7.1
