@@ -169,10 +169,7 @@ For exemple if you want to test _FEDBS_ algorithm for micro-calcification detect
  ```sh
 $ python run.py -a fedbs -m dog
 ```
-![alt text](/home/bobmarley/Pictures/Screenshot from 2021-08-26 16-48-07.png)
-
-![alt text](/home/bobmarley/Pictures/Screenshot from 2021-08-26 16-48-16.png)
-
+![alt text](dog.png)
 
 <!-- ROADMAP -->
 <!--
