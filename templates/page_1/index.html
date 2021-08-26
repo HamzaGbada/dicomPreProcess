@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <link href="{{ url_for('static', filename='static_1/css/cornerstone.min.css') }}" rel="stylesheet">
+
+</head>
+<body>
+
+<div class="container">
+
+    <form id="form_id" action="http://127.0.0.1:5000/" enctype="multipart/form-data" method="POST" style="margin:auto">
+        <div class="btn-group btn-group-justified">
+            <input id="gammaButton" type="submit" class="form-control" value="Gamma Correction" name="file" style="background-color: #2B81AF; color: azure; border-bottom-color: #528CE0">
+            <span class="input-group-addon"></span>
+            <input id="otsuButton" type="submit" class="form-control" value="Otsu Threshold" name="file" style="background-color: #2B81AF; color: azure; border-bottom-color: #528CE0">
+            <span class="input-group-addon"></span>
+            <input id="contrastButton" type="submit" class="form-control" value="Contrast change" name="file" style="background-color: #2B81AF; color: azure; border-bottom-color: #528CE0" >
+        </div>
+        <div class="input-group mb-3">
+            <input id="gammaValue" type="text" class="form-control" placeholder="gamma" aria-label="gamma" aria-describedby="basic-addon1">
+            <span class="input-group-addon"></span>
+            <input id="otsuValue" type="text" class="form-control" placeholder="max" aria-label="max" aria-describedby="basic-addon1">
+            <span class="input-group-addon"></span>
+            <input id="contrastValue" type="text" class="form-control" placeholder="contrast" aria-label="contrast" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group mb-3">
+            <input id="formControlDisabled" type="text" class="form-control" placeholder="Disabled input" aria-label="disabled input example" aria-describedby="basic-addon1" disabled>
+            <span class="input-group-addon"></span>
+            <input type="text" class="form-control" placeholder="Disabled input" aria-label="disabled input example" aria-describedby="basic-addon1" disabled>
+            <span class="input-group-addon"></span>
+            <input id="brightnessValue" type="text" class="form-control" placeholder="brightness" aria-label="brightness" aria-describedby="basic-addon1">
+        </div>
+        <div id="parent">
+            <div>
+                <div class="input-group mb-3">
+<!--                    <form class="custom-file">-->
+                        <div class="form-group">
+                            <input type="file" id="selectFile" class="form-control" id="inputGroupFile01" name="file">
+                        </div>
+<!--                    </form>-->
+                </div>
+                <div style="width:512px;height:512px;position:relative;color: white;display:inline-block;border-style:solid;border-color:#d9f0c9;"
+                     oncontextmenu="return false"
+                     class='disable-selection noIbar'
+                     unselectable='on'
+                     onselectstart='return false;'
+                     onmousedown='return false;'>
+                    <div id="dicomImage"
+                         style="width:512px;height:512px;top:0px;left:0px; position:absolute">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+
+
+</body>
+
+
+<!-- jquery - currently a dependency and thus required for using cornerstoneWADOImageLoader -->
+<script src="../../static/static_1/js/jquery.min.js"></script>
+
+<!-- include the cornerstone library -->
+<script src="../../static/static_1/js/cornerstone.min.js"></script>
+
+<!-- include the dicomParser library as the WADO image loader depends on it -->
+<script src="../../static/static_1/js/dicomParser.min.js"></script>
+
+<!-- include the cornerstoneWADOImageLoader library -->
+<script src="../../static/static_1/js/cornerstoneWADOImageLoader.min.js"></script>
+<script src="../../static/static_1/dist/cornerstoneFileImageLoader.js"></script>
+<!-- jpeg 2000 codec -->
+<script src="../../static/static_1/js/jpx.min.js"></script>
+
+<script src="../../static/static_1/js/index.js"></script>
+</html>
