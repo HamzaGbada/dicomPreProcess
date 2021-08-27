@@ -4,8 +4,9 @@ import logging
 import numpy as np
 from math import sqrt, pi
 from skimage.filters import gabor
+from numba import cuda
 
-
+from Service.GRAILGPU import GaborGPU
 from Mapper.mathOperation import PixelArrayOperation
 from Mapper.mathOperation import InformationTheory
 
@@ -170,7 +171,10 @@ class Gabor:
             octat_gabor : A ndarray vector with shape = (input.shape[0], input.shape[1], (scales * orientations) / (d1 * d2)).
         """
         octat_array = PixelArrayOperation.from12bitTo8bit(input, a, b)
-        octat_gabor = Gabor.gabor_decomposition(octat_array, scales, orientations)
+        if cuda.is_available():
+            octat_gabor = GaborGPU.gabor_decomposition_gpu(octat_array)
+        else:
+            octat_gabor = Gabor.gabor_decomposition(octat_array, scales, orientations)
 
         return octat_gabor
 
@@ -239,7 +243,10 @@ class Gabor_information:
 
         a_k = a_0
         b_step = np.arange(b_0, b_mean - 1, -step)
-        pixel_data_gabor = Gabor.gabor_decomposition(input, scales, orientations)
+        if cuda.is_available():
+            pixel_data_gabor = GaborGPU.gabor_decomposition_gpu(input)
+        else:
+            pixel_data_gabor = Gabor.gabor_decomposition(input, scales, orientations)
 
         mutual_info_array = np.empty(0)
 
@@ -286,7 +293,10 @@ class Gabor_information:
 
         b_k = b_0
         a_step = np.arange(a_0, a_mean + 1, step)
-        pixel_data_gabor = Gabor.gabor_decomposition(input, scales, orientations)
+        if cuda.is_available():
+            pixel_data_gabor = GaborGPU.gabor_decomposition_gpu(input)
+        else:
+            pixel_data_gabor = Gabor.gabor_decomposition(input, scales, orientations)
 
         mutual_info_array = np.empty(0)
 
