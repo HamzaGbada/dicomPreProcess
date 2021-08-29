@@ -151,8 +151,8 @@ $ docker exec -it dicomImage /bin/bash
 ```sh
 $ python run.py -h
 
-    usage: run.py [-h] [-a ALGORITHM] [-m METHOD]
-    
+    usage: run.py [-h] [-a ALGORITHM] [-m METHOD] -f FILE
+
     Description of your Dicom PreProcess
     
     optional arguments:
@@ -160,14 +160,14 @@ $ python run.py -h
       -a ALGORITHM, --algorithm ALGORITHM
                             Choose the algorithm to use. It can be "grail" or "fedbs"
       -m METHOD, --method METHOD
-                            Choose the method to use. It can be "dog", "log" or "bbp". This command is validated if and only if the "fedbs" algorithm is
-                            chosen
+                            Choose the method to use. It can be "dog", "log" or "bbp". This command is validated if and only if the "fedbs" algorithm is chosen
+      -f FILE, --file FILE  Choose the DICOM file path to be processed by default the file is located "data/"
 
 ```
 
-For exemple if you want to test _FEDBS_ algorithm for micro-calcification detection:
+For exemple if you want to test _FEDBS_ algorithm for micro-calcification detection on the file _20587054.dcm_:
  ```sh
-$ python run.py -a fedbs -m dog
+$ python run.py -a fedbs -m dog -f 20587054.dcm
 ```
 ![alt text](dog.png)
 
