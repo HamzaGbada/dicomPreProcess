@@ -13,8 +13,10 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 if __name__ == "__main__":
-
-    image = Data.load_dicom_image("data/20587054.dcm")
+    # x,y are the coordinates of the central point in ROI
+    x = 1250
+    y = 2000
+    image = Data.load_dicom_image("data/"+argument.file)
     array = image.array
     logger.debug("Pixel Data \n {}".format(array))
     logger.debug("Pixel Data shape \n {}".format(image.shape))
@@ -23,14 +25,14 @@ if __name__ == "__main__":
     if argument.algorithm == 'fedbs' :
         if argument.method == 'dog':
             fedbs_array = Data.fedbs_main(Methode.DOG, array)
-            array = PixelArrayOperation.getROI(array, 1250, 2000)
-            output = PixelArrayOperation.getROI(fedbs_array, 1250, 2000)
+            array = PixelArrayOperation.getROI(array, x, y)
+            output = PixelArrayOperation.getROI(fedbs_array, x, y)
         if argument.method == 'log':
             fedbs_array = Data.fedbs_main(Methode.LOG, array)
-            array = PixelArrayOperation.getROI(array, 1250, 2000)
-            output = PixelArrayOperation.getROI(fedbs_array, 1250, 2000)
+            array = PixelArrayOperation.getROI(array, x, y)
+            output = PixelArrayOperation.getROI(fedbs_array, x, y)
         if argument.method == 'bbp':
-            array = PixelArrayOperation.getROI(array, 1250, 2000)
+            array = PixelArrayOperation.getROI(array, x, y)
             output = Data.fedbs_main(Methode.FFT, array)
 
     Data.plot_image(array)
