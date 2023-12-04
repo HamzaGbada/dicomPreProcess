@@ -13,9 +13,9 @@ from Mapper.mathOperation import InformationTheory
 # Create and configure logger
 from Service.PreProcessService import PreProcess
 
-logging.basicConfig(filename="grail.log",
-                    format='%(asctime)s %(message)s',
-                    filemode='w')
+logging.basicConfig(
+    filename="grail.log", format="%(asctime)s %(message)s", filemode="w"
+)
 
 # Creating an object
 logger = logging.getLogger()
@@ -25,9 +25,8 @@ logger.setLevel(logging.DEBUG)
 
 
 class Gabor:
-
     @staticmethod
-    def gabor_blank_filter(input,  scales, orientation, output=None):
+    def gabor_blank_filter(input, scales, orientation, output=None):
         """
         Generates a custum Gabor filter.
         It creates a tensor with shape = (scales, orientation, input.shape[0], input.shape[1]).
@@ -65,7 +64,9 @@ class Gabor:
             beta = fi / eta
             for j in range(orientation):
                 theta = pi * (j / orientation)
-                filt_real, filt_imag = gabor(input, fi, theta, sigma_x=alpha, sigma_y=beta)
+                filt_real, filt_imag = gabor(
+                    input, fi, theta, sigma_x=alpha, sigma_y=beta
+                )
                 gabor_out = np.absolute(filt_real + 1j * filt_imag)
                 output[i][j] = gabor_out
         return np.array(output)
@@ -109,9 +110,13 @@ class Gabor:
         gabor_abs = Gabor.gabor_blank_filter(input, scales=3, orientation=6)
         for i in range(scales):
             for j in range(orientations):
-                output = np.append(output, gabor_abs[i,j,::d1, ::d2].reshape(-1))
+                output = np.append(output, gabor_abs[i, j, ::d1, ::d2].reshape(-1))
         logger.debug("gabor feature out shape\n {}".format(output.shape))
-        return np.reshape(output,(input.shape[0] // d1, input.shape[1] // d2, scales*orientations), order='F')
+        return np.reshape(
+            output,
+            (input.shape[0] // d1, input.shape[1] // d2, scales * orientations),
+            order="F",
+        )
 
     @staticmethod
     def gabor_decomposition(input, scales, orientations, d1=1, d2=1):
@@ -180,7 +185,6 @@ class Gabor:
 
 
 class Gabor_information:
-
     @staticmethod
     def gabor_mutual_information(input, gabor_pixel_data, a, b, scales, orientations):
         """
@@ -203,14 +207,17 @@ class Gabor_information:
                     The mutual information between a 12 bit image
                     and its 8 bit representation.
         """
-        octat_gabor = Gabor.gabor_8bit_respresentation(input, a, b, scales, orientations)
+        octat_gabor = Gabor.gabor_8bit_respresentation(
+            input, a, b, scales, orientations
+        )
         gabor_mi = InformationTheory.mutual_information(gabor_pixel_data, octat_gabor)
 
         return gabor_mi
 
     @staticmethod
-    def mutual_information_gabor_highest_intensity(input, step, scales, orientations, b_0=None, b_mean=None,
-                                                   a_0=None):
+    def mutual_information_gabor_highest_intensity(
+        input, step, scales, orientations, b_0=None, b_mean=None, a_0=None
+    ):
         """
         This function performs the GRAIL algorithm
         starting with the highest intensity and continuing downwards.
@@ -252,15 +259,20 @@ class Gabor_information:
 
         for b_k in b_step:
             logger.debug("b_k in highest intensity \n {}".format(b_k))
-            gabor_mi = Gabor_information.gabor_mutual_information(input, pixel_data_gabor, a_k, b_k, scales, orientations)
-            logger.debug("gabor Mutual Information in highest intensity \n {}".format(gabor_mi))
+            gabor_mi = Gabor_information.gabor_mutual_information(
+                input, pixel_data_gabor, a_k, b_k, scales, orientations
+            )
+            logger.debug(
+                "gabor Mutual Information in highest intensity \n {}".format(gabor_mi)
+            )
             mutual_info_array = np.append(mutual_info_array, gabor_mi)
 
         return mutual_info_array, b_step
 
     @staticmethod
-    def mutual_information_gabor_lowest_intensity(input, step, scales, orientations, a_mean=None, a_0=None,
-                                                  b_0=None):
+    def mutual_information_gabor_lowest_intensity(
+        input, step, scales, orientations, a_mean=None, a_0=None, b_0=None
+    ):
         """
         This function performs the GRAIL algorithm
         starting with the lowest intensity and continuing upwards.
@@ -302,8 +314,12 @@ class Gabor_information:
 
         for a_k in a_step:
             logger.debug("a_k in lowest intensity \n {}".format(a_k))
-            gabor_mi = Gabor_information.gabor_mutual_information(input, pixel_data_gabor, b_k, a_k, scales, orientations)
-            logger.debug("gabor Mutual Information in lowest intensity \n {}".format(gabor_mi))
+            gabor_mi = Gabor_information.gabor_mutual_information(
+                input, pixel_data_gabor, b_k, a_k, scales, orientations
+            )
+            logger.debug(
+                "gabor Mutual Information in lowest intensity \n {}".format(gabor_mi)
+            )
             mutual_info_array = np.append(mutual_info_array, gabor_mi)
 
         return mutual_info_array, a_step
@@ -346,18 +362,24 @@ class Gabor_information:
         b_init = b_0
         for step in step_list:
             logger.debug("step during update  \n {}".format(step))
-            mutual_info_right_array, b_step = Gabor_information.mutual_information_gabor_highest_intensity(input, step, scales,
-                                                                                              orientations, b_0, b_mean,
-                                                                                              a_0)
+            (
+                mutual_info_right_array,
+                b_step,
+            ) = Gabor_information.mutual_information_gabor_highest_intensity(
+                input, step, scales, orientations, b_0, b_mean, a_0
+            )
             max_ind = np.argmax(mutual_info_right_array)
             best_b = b_step[max_ind]
 
-            mutual_info_left_array, a_step = Gabor_information.mutual_information_gabor_lowest_intensity(input, step, scales,
-                                                                                            orientations, a_mean, a_0,
-                                                                                            best_b)
+            (
+                mutual_info_left_array,
+                a_step,
+            ) = Gabor_information.mutual_information_gabor_lowest_intensity(
+                input, step, scales, orientations, a_mean, a_0, best_b
+            )
             max_ind = np.argmax(mutual_info_left_array)
             best_a = a_step[max_ind]
-            if (a_init == best_a and b_init == best_b):
+            if a_init == best_a and b_init == best_b:
                 break
             a_init = best_a
             b_init = best_b

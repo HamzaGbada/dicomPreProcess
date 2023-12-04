@@ -10,16 +10,17 @@ from Mapper.DicomMapper import DicomMapper
 
 
 class ContrastAdjust(Resource):
-
     def __init__(self):
         self._preprocess = PreProcess()
 
     def post(self, contrast, brightness):
         # get the dicom file from post request
         parse = reqparse.RequestParser()
-        parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+        parse.add_argument(
+            "file", type=werkzeug.datastructures.FileStorage, location="files"
+        )
         args = parse.parse_args()
-        uploaded_file = args['file']
+        uploaded_file = args["file"]
         uploaded_file.save("temp.dcm")
 
         # get pixel_array from the dicom file
@@ -33,6 +34,5 @@ class ContrastAdjust(Resource):
         DicomMapper.fromPixelToDicom(output, "temp.dcm")
 
         # render the html template
-        headers = {'Content-Type': 'text/html'}
-        return make_response(render_template('page_2/index.html'),200,headers)
-
+        headers = {"Content-Type": "text/html"}
+        return make_response(render_template("page_2/index.html"), 200, headers)

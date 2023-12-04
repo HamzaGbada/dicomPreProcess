@@ -63,7 +63,7 @@ class PixelArrayOperation:
                    [0, 0, 1, 1, 1, 0, 0],
                    [0, 0, 1, 1, 1, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0]])
-            """
+        """
         return ndimage.binary_closing(input, structure=np.ones((7, 7))).astype(np.int)
 
     @staticmethod
@@ -107,7 +107,7 @@ class PixelArrayOperation:
                [0, 1, 1, 1, 0],
                [0, 0, 0, 0, 0]])
 
-            """
+        """
         return ndimage.binary_fill_holes(input, structure=np.ones((7, 7))).astype(int)
 
     @staticmethod
@@ -171,46 +171,46 @@ class PixelArrayOperation:
     @staticmethod
     def binarize(input, alpha):
         """
-           This function binarize an image using local and global variance.
-           For more infomation check this paper:
-                https://www.researchgate.net/publication/306253912_Mammograms_calcifications_segmentation_based_on_band-pass_Fourier_filtering_and_adaptive_statistical_thresholding
+        This function binarize an image using local and global variance.
+        For more infomation check this paper:
+             https://www.researchgate.net/publication/306253912_Mammograms_calcifications_segmentation_based_on_band-pass_Fourier_filtering_and_adaptive_statistical_thresholding
 
-           Parameters:
-               input : a 2D ndarray.
-               alpha : float
-                    a scaling factor that relates the local and global variances.
+        Parameters:
+            input : a 2D ndarray.
+            alpha : float
+                 a scaling factor that relates the local and global variances.
 
-           Returns:
-               a 2D ndarray with the same size as the input containing 0 or 1 (a binary array)
+        Returns:
+            a 2D ndarray with the same size as the input containing 0 or 1 (a binary array)
 
 
-           Examples:
-                >>> a = np.random.randint(0, 5, (9,9))
-                >>> a
-                array([[3, 1, 0, 1, 1, 3, 4, 2, 2],
-                       [0, 3, 3, 2, 3, 4, 0, 1, 1],
-                       [0, 4, 4, 4, 3, 3, 1, 0, 3],
-                       [4, 2, 3, 2, 2, 4, 2, 3, 4],
-                       [2, 1, 3, 0, 0, 1, 4, 3, 1],
-                       [2, 0, 0, 2, 0, 4, 0, 3, 1],
-                       [4, 4, 4, 0, 4, 4, 1, 4, 2],
-                       [2, 1, 3, 1, 2, 3, 1, 2, 0],
-                       [4, 1, 3, 2, 3, 2, 3, 3, 0]])
-                >>> PixelArrayOperation.binarize(a, 0.5)
-                array([[1, 1, 0, 0, 1, 0, 0, 0, 0],
-                       [1, 1, 0, 0, 0, 0, 0, 0, 0],
-                       [1, 1, 0, 0, 0, 0, 0, 0, 0],
-                       [1, 1, 1, 1, 1, 1, 1, 1, 0],
-                       [1, 1, 1, 1, 1, 1, 1, 0, 0],
-                       [0, 0, 0, 1, 1, 1, 1, 1, 0],
-                       [0, 0, 1, 1, 1, 0, 1, 0, 0],
-                       [1, 0, 0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0, 0, 0]])
+        Examples:
+             >>> a = np.random.randint(0, 5, (9,9))
+             >>> a
+             array([[3, 1, 0, 1, 1, 3, 4, 2, 2],
+                    [0, 3, 3, 2, 3, 4, 0, 1, 1],
+                    [0, 4, 4, 4, 3, 3, 1, 0, 3],
+                    [4, 2, 3, 2, 2, 4, 2, 3, 4],
+                    [2, 1, 3, 0, 0, 1, 4, 3, 1],
+                    [2, 0, 0, 2, 0, 4, 0, 3, 1],
+                    [4, 4, 4, 0, 4, 4, 1, 4, 2],
+                    [2, 1, 3, 1, 2, 3, 1, 2, 0],
+                    [4, 1, 3, 2, 3, 2, 3, 3, 0]])
+             >>> PixelArrayOperation.binarize(a, 0.5)
+             array([[1, 1, 0, 0, 1, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 1, 1, 0],
+                    [0, 0, 1, 1, 1, 0, 1, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
-            """
+        """
         local_variance = PixelArrayOperation.getLocalVariance(input, 5)
         global_variance = PixelArrayOperation.variance(input)
-        b = local_variance ** 2 < (alpha * global_variance ** 2)
+        b = local_variance**2 < (alpha * global_variance**2)
         return np.where(b, 0, 1)
 
     @staticmethod
@@ -218,7 +218,7 @@ class PixelArrayOperation:
         """
         This function return the region of interest in an image.
         """
-        r = img[x - size:x + size + 1, y - size:y + size + 1]
+        r = img[x - size : x + size + 1, y - size : y + size + 1]
         return r
 
     @staticmethod
@@ -274,37 +274,37 @@ class PixelArrayOperation:
     @staticmethod
     def butterworth_kernel(input, D_0=21, W=32, n=3):
         """
-         Apply a Butterworth band-pass filter to enhance frequency features.
-         This filter is defined in the Fourier domain.
-         For more:
-            https://en.wikipedia.org/wiki/Butterworth_filter
+        Apply a Butterworth band-pass filter to enhance frequency features.
+        This filter is defined in the Fourier domain.
+        For more:
+           https://en.wikipedia.org/wiki/Butterworth_filter
 
-         Parameters:
-             input: 2d ndarray to process.
-             D_0: float
-                  cutoff frequency
-             W: float
-                filter bandwidth
-             n: int
-                filter order
-         Returns:
-             band_pass: ndarray
-                        The Butterworth-kernel.
+        Parameters:
+            input: 2d ndarray to process.
+            D_0: float
+                 cutoff frequency
+            W: float
+               filter bandwidth
+            n: int
+               filter order
+        Returns:
+            band_pass: ndarray
+                       The Butterworth-kernel.
 
 
-         Examples:
-             >>> a = np.random.randint(0, 5, (3,3))
-             >>> PixelArrayOperation.butterworth_kernel(a)
-             array([[0.78760795, 0.3821997 , 0.3821997 ],
-                   [0.3821997 , 0.00479278, 0.00479278],
-                   [0.3821997 , 0.00479278, 0.00479278]])
+        Examples:
+            >>> a = np.random.randint(0, 5, (3,3))
+            >>> PixelArrayOperation.butterworth_kernel(a)
+            array([[0.78760795, 0.3821997 , 0.3821997 ],
+                  [0.3821997 , 0.00479278, 0.00479278],
+                  [0.3821997 , 0.00479278, 0.00479278]])
 
-         """
+        """
         x = input.shape[0]
         y = input.shape[1]
         u, v = np.meshgrid(np.arange(x), np.arange(y))
         D = np.sqrt((u - x / 2) ** 2 + (v - y / 2) ** 2)
-        band_pass = D ** 2 - D_0 ** 2
+        band_pass = D**2 - D_0**2
         cuttoff = 8 * W * D
         denom = 1.0 + (band_pass / cuttoff) ** (2 * n)
         band_pass = 1.0 / denom
@@ -313,22 +313,22 @@ class PixelArrayOperation:
     @staticmethod
     def make_step(delta, k_max):
         """
-         This function compute the optimization grid.
+        This function compute the optimization grid.
 
-         Parameters:
-             delta: int
-                    initial intensity span.
-             k_max: int
-                   number of iteration.
-         Returns:
-             steps: array with optimization steps.
+        Parameters:
+            delta: int
+                   initial intensity span.
+            k_max: int
+                  number of iteration.
+        Returns:
+            steps: array with optimization steps.
 
 
-         Examples:
-             >>> PixelArrayOperation.make_step(300, 3)
-             [300, 30, 3]
+        Examples:
+            >>> PixelArrayOperation.make_step(300, 3)
+            [300, 30, 3]
 
-         """
+        """
         step_list = [delta]
         for s in range(k_max - 1):
             delta //= 10
@@ -340,29 +340,29 @@ class PixelArrayOperation:
     @staticmethod
     def from12bitTo8bit(image, a, b):
         """
-         This function resamples a 12 bit image to 8 bit outputting the resulting
-         image as 12 bits. It applies lowest (a) and highest (b) intensity window.
+        This function resamples a 12 bit image to 8 bit outputting the resulting
+        image as 12 bits. It applies lowest (a) and highest (b) intensity window.
 
-         Parameters:
-             delta: 2d ndarray to process.
-             a: lowest intensity
-             b: highest intensity
+        Parameters:
+            delta: 2d ndarray to process.
+            a: lowest intensity
+            b: highest intensity
 
-         Returns:
-             a 12 bit 2d ndarray but resampled as if displayed in 8 bit
+        Returns:
+            a 12 bit 2d ndarray but resampled as if displayed in 8 bit
 
 
-         Examples:
-             >>> a = np.random.randint(0, 4095, (3,3))
-             >>> a
-             array([[2620, 2500,  881],
-                   [1760, 2360,  634],
-                   [1447, 2329,   93]])
-             >>> PixelArrayOperation.from12bitTo8bit(a, 1997, 4080)
-             array([[846.14509804, 707.40784314,  93.        ],
-                   [ 93.        , 529.03137255,  93.        ],
+        Examples:
+            >>> a = np.random.randint(0, 4095, (3,3))
+            >>> a
+            array([[2620, 2500,  881],
+                  [1760, 2360,  634],
+                  [1447, 2329,   93]])
+            >>> PixelArrayOperation.from12bitTo8bit(a, 1997, 4080)
+            array([[846.14509804, 707.40784314,  93.        ],
+                  [ 93.        , 529.03137255,  93.        ],
 
-         """
+        """
         if a == b:
             if a == 0:
                 normed = image * 255
@@ -371,7 +371,9 @@ class PixelArrayOperation:
         else:
             normed = (image - a) / (b - a) * 255
 
-        return (np.clip(np.rint(normed), 0, 255)) / 255 * (int(image.max()) - int(image.min())) + int(image.min())
+        return (np.clip(np.rint(normed), 0, 255)) / 255 * (
+            int(image.max()) - int(image.min())
+        ) + int(image.min())
 
 
 class InformationTheory:
@@ -399,8 +401,11 @@ class InformationTheory:
             11.9883
 
         """
-        histogram, bin_edges = np.histogram(input, bins=int(input.max()) - int(input.min()) + 1,
-                                            range=(int(input.min()), int(input.max()) + 1))
+        histogram, bin_edges = np.histogram(
+            input,
+            bins=int(input.max()) - int(input.min()) + 1,
+            range=(int(input.min()), int(input.max()) + 1),
+        )
         probabilities = histogram / input.size
         probabilities = probabilities[probabilities != 0]
 
@@ -464,7 +469,10 @@ class InformationTheory:
             >>> mi
             17.3331
         """
-        mi = InformationTheory.entropy(input) + InformationTheory.entropy(dest_data) - InformationTheory.joint_entropy(
-            input, dest_data)
+        mi = (
+            InformationTheory.entropy(input)
+            + InformationTheory.entropy(dest_data)
+            - InformationTheory.joint_entropy(input, dest_data)
+        )
 
         return mi

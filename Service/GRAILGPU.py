@@ -25,15 +25,26 @@ class GaborGPU:
         alpha = fi / gamma
         beta = fi / eta
         theta = pi * (j / orientation)
-        xprime = cos(theta) * ((x + 1) - ((kernel_size + 1) / 2)) + sin(theta) * ((y + 1) - ((kernel_size + 1) / 2))
-        yprime = -sin(theta) * ((x + 1) - ((kernel_size + 1) / 2)) + cos(theta) * ((y + 1) - ((kernel_size + 1) / 2))
-        gabor_kernel[i, j, x, y] = exp(-((pow(alpha, 2)) * (pow(xprime, 2)) + (pow(beta, 2)) * (pow(yprime, 2)))) * (
-                fi ** 2 / (pi * gamma * eta)) * exp(fi * pi * xprime * 2j)
+        xprime = cos(theta) * ((x + 1) - ((kernel_size + 1) / 2)) + sin(theta) * (
+            (y + 1) - ((kernel_size + 1) / 2)
+        )
+        yprime = -sin(theta) * ((x + 1) - ((kernel_size + 1) / 2)) + cos(theta) * (
+            (y + 1) - ((kernel_size + 1) / 2)
+        )
+        gabor_kernel[i, j, x, y] = (
+            exp(
+                -(
+                    (pow(alpha, 2)) * (pow(xprime, 2))
+                    + (pow(beta, 2)) * (pow(yprime, 2))
+                )
+            )
+            * (fi**2 / (pi * gamma * eta))
+            * exp(fi * pi * xprime * 2j)
+        )
 
     @staticmethod
     @cuda.jit
     def convolve(result, mask, image):
-
         i, j = cuda.grid(2)
         image_rows, image_cols = image.shape
 
@@ -46,7 +57,12 @@ class GaborGPU:
                 i_k = i - k + delta_rows
                 j_l = j - l + delta_cols
                 # (-4-) Check if (i_k, j_k) coordinates are inside the image:
-                if (i_k >= 0) and (i_k < image_rows) and (j_l >= 0) and (j_l < image_cols):
+                if (
+                    (i_k >= 0)
+                    and (i_k < image_rows)
+                    and (j_l >= 0)
+                    and (j_l < image_cols)
+                ):
                     s += mask[k, l] * image[i_k, j_l]
         result[i, j] = abs(s)
 
@@ -63,7 +79,7 @@ class GaborGPU:
     @staticmethod
     @cuda.jit(device=True)
     def minimum_device(x, limit):
-        if (x > limit):
+        if x > limit:
             return limit
         return x
 
@@ -74,8 +90,12 @@ class GaborGPU:
         j = cuda.threadIdx.y + cuda.blockIdx.y * cuda.blockDim.x
         if i < 44 and j < 44:
             for k in range(18):
-                feat_v[:, :, k][i, j] = feat_v[:, :, k][i, j] / GaborGPU.maximum_device(feat_v[:, :, k])
-                feat_v[:, :, k][i, j] = GaborGPU.minimum_device(feat_v[:, :, k][i, j], 0.5) * 512
+                feat_v[:, :, k][i, j] = feat_v[:, :, k][i, j] / GaborGPU.maximum_device(
+                    feat_v[:, :, k]
+                )
+                feat_v[:, :, k][i, j] = (
+                    GaborGPU.minimum_device(feat_v[:, :, k][i, j], 0.5) * 512
+                )
 
     @staticmethod
     @cuda.jit
@@ -105,11 +125,15 @@ class GaborGPU:
 
         for i in range(3):
             for j in range(6):
-                GaborGPU.convolve[griddim, blockdim](d_result[i, j], d_gabor_kernel[i, j], d_image)
+                GaborGPU.convolve[griddim, blockdim](
+                    d_result[i, j], d_gabor_kernel[i, j], d_image
+                )
                 GaborGPU.feature_vect[1, 1](d_result[i, j], d1, d2)
-        d_result = d_result.reshape((image.shape[0] // d1, image.shape[1] // d2, scales * orientation), order='F')
+        d_result = d_result.reshape(
+            (image.shape[0] // d1, image.shape[1] // d2, scales * orientation),
+            order="F",
+        )
         GaborGPU.decomposition_normalization[(2,), (32, 32)](d_result)
         k1 = d_result.copy_to_host()
 
         return k1
-

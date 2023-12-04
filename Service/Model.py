@@ -12,9 +12,9 @@ from Mapper.mathOperation import PixelArrayOperation
 from Service.PreProcessService import PreProcess
 import numpy as np
 
-logging.basicConfig(filename="grail.log",
-                    format='%(asctime)s %(message)s',
-                    filemode='w')
+logging.basicConfig(
+    filename="grail.log", format="%(asctime)s %(message)s", filemode="w"
+)
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -31,15 +31,17 @@ class Format(enum.Enum):
     GRAY = 1
     RGB = 3
 
+
 class Methode(enum.Enum):
     DOG = 0
     LOG = 1
     FFT = 2
 
+
 class Image:
     def __init__(self, array, array_bits):
         self._array = array
-        if (len(array.shape) < 3 or array.shape[2] == 1):
+        if len(array.shape) < 3 or array.shape[2] == 1:
             self._array_format = Format.GRAY
         elif len(array.shape) == 3:
             self._array_format = Format.RGB
@@ -90,7 +92,6 @@ class Image:
 
 
 class Data:
-
     @staticmethod
     def load_dicom_image(path):
         dicom_reader = pydicom.dcmread(path, force=True)
