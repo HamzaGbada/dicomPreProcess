@@ -26,6 +26,7 @@
 import os
 import uuid
 
+import fastapi
 import matplotlib.pyplot as plt
 import uvicorn
 from PIL import Image
@@ -37,7 +38,11 @@ from Service.Model import Data
 
 app = FastAPI()
 
-
+@app.post("/applyFedbs", responses={
+    200: {
+        "content": {"image/jpeg": {}}
+    }
+})
 async def upload_file(
         file: UploadFile = File(...),
         method: str = Query("dog", description="The method to be applied by default"),
@@ -74,7 +79,7 @@ async def upload_file(
         # Remove the saved JPEG file
         os.remove(output_path)
 
-        return Response(content=file_data, media_type="image/jpeg")
+        return fastapi.responses.FileResponse(output_path)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
