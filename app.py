@@ -23,20 +23,26 @@
 #
 # if __name__ == "__main__":
 #     app.run(port=5000, debug=True)
+import os
+import uuid
+
 import matplotlib.pyplot as plt
 import uvicorn
+from PIL import Image
 from fastapi import UploadFile, File, FastAPI, HTTPException, Query
+from fastapi.openapi.models import Response
 
 from Mapper.mathOperation import PixelArrayOperation
 from Service.Model import Data
 
 app = FastAPI()
-@app.post("/applyFedbs")
+
+
 async def upload_file(
-    file: UploadFile = File(...),
-    method: str = Query("dog", description="The method to be applied by default "),
-    x: int = Query(..., description="X-coordinate of the center of the bounding box"),
-    y: int = Query(..., description="Y-coordinate of the center of the bounding box")
+        file: UploadFile = File(...),
+        method: str = Query("dog", description="The method to be applied by default"),
+        x: int = Query(..., description="X-coordinate of the center of the bounding box"),
+        y: int = Query(..., description="Y-coordinate of the center of the bounding box")
 ):
     # Check if the uploaded file is a DICOM file
     if not file.filename.lower().endswith('.dcm'):
@@ -46,16 +52,30 @@ async def upload_file(
         image = Data.load_dicom_image(file.file)
         array = image.array
         fedbs_array = Data.fedbs_main(method, array)
-        array = PixelArrayOperation.getROI(array, x, y)
-        plt.imshow(array)
 
-        output = PixelArrayOperation.getROI(fedbs_array, x, y)
-        plt.imshow(output)
-        plt.show()
+        # Get the region of interest from the original image array
+        roi_array = PixelArrayOperation.getROI(array, x, y)
 
-        return {"filename": file.filename, "content_type": "image/jpeg", "file": file.filename}
+        # Get the region of interest from the processed image array
+        fedbs_roi_array = PixelArrayOperation.getROI(fedbs_array, x, y)
+
+        # Convert the processed image array to an image
+        fedbs_image = Image.fromarray(fedbs_roi_array)
+
+        # Save the image as a JPEG file
+        filename = f"{uuid.uuid4()}.jpg"
+        output_path = f"./{filename}"
+        fedbs_image.save(output_path, format="JPEG")
+
+        # Read the saved JPEG file
+        with open(output_path, "rb") as file:
+            file_data = file.read()
+
+        # Remove the saved JPEG file
+        os.remove(output_path)
+
+        return Response(content=file_data, media_type="image/jpeg")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
