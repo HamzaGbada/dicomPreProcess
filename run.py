@@ -1,6 +1,7 @@
-from Mapper.mathOperation import PixelArrayOperation
-from Service.Model import Data, Methode
 import logging
+
+from Mapper.mathOperation import PixelArrayOperation
+from Service.Model import Data
 from args import argument
 
 # Logger Setup
@@ -24,16 +25,16 @@ if __name__ == "__main__":
         output = Data.grail_main(array)
     if argument.algorithm == "fedbs":
         if argument.method == "dog":
-            fedbs_array = Data.fedbs_main(Methode.DOG, array)
+            fedbs_array = Data.fedbs_main("dog", array)
             array = PixelArrayOperation.getROI(array, x, y)
             output = PixelArrayOperation.getROI(fedbs_array, x, y)
         if argument.method == "log":
-            fedbs_array = Data.fedbs_main(Methode.LOG, array)
+            fedbs_array = Data.fedbs_main("log", array)
             array = PixelArrayOperation.getROI(array, x, y)
             output = PixelArrayOperation.getROI(fedbs_array, x, y)
-        if argument.method == "bbp":
+        if argument.method == "fft":
             array = PixelArrayOperation.getROI(array, x, y)
-            output = Data.fedbs_main(Methode.FFT, array)
+            output = Data.fedbs_main("fft", array)
 
     Data.plot_image(array)
     Data.plot_image(output)

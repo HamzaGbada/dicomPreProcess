@@ -28,13 +28,13 @@ import uvicorn
 from fastapi import UploadFile, File, FastAPI, HTTPException, Query
 
 from Mapper.mathOperation import PixelArrayOperation
-from Service.Model import Methode, Data
+from Service.Model import Data
 
 app = FastAPI()
 @app.post("/applyFedbs")
 async def upload_file(
     file: UploadFile = File(...),
-    method: Methode = Query(Methode.DOG, description="The method to be applied by default "),
+    method: str = Query("dog", description="The method to be applied by default "),
     x: int = Query(..., description="X-coordinate of the center of the bounding box"),
     y: int = Query(..., description="Y-coordinate of the center of the bounding box")
 ):
@@ -45,7 +45,7 @@ async def upload_file(
     try:
         image = Data.load_dicom_image(file.file)
         array = image.array
-        fedbs_array = Data.fedbs_main(Methode.DOG, array)
+        fedbs_array = Data.fedbs_main(method, array)
         array = PixelArrayOperation.getROI(array, x, y)
         plt.imshow(array)
 

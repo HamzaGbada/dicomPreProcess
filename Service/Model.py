@@ -32,11 +32,6 @@ class Format(enum.Enum):
     RGB = 3
 
 
-class Methode(enum.Enum):
-    DOG = 0
-    LOG = 1
-    FFT = 2
-
 
 class Image:
     def __init__(self, array, array_bits):
@@ -141,20 +136,20 @@ class Data:
         Returns:
            b_f: a binary array.
         """
-        if method_type == Methode.DOG:
+        if method_type == "dog":
             sigma1 = 1.7
             sigma2 = 2
             fi = PreProcess.DoG(array, sigma1, sigma2)
-        elif method_type == Methode.LOG:
+        elif method_type == "log":
             sigma = 2
             fi = PreProcess.LoG(array, sigma)
-        elif method_type == Methode.FFT:
+        elif method_type == "fft":
             froi = PixelArrayOperation.fft(array)
             H = PixelArrayOperation.butterworth_kernel(froi)
             fi = PixelArrayOperation.inverse_fft(np.multiply(froi, H))
         fi = ndimage.median_filter(abs(fi), size=(5, 5))
         fi = PreProcess.GammaCorrection(fi, 1.25)
-        if method_type == Methode.FFT:
+        if method_type == "fft":
             B = PixelArrayOperation.binarize(fi, 1)
         else:
             B = PreProcess.OtsuThresholding(fi)
