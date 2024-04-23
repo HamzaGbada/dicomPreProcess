@@ -1,0 +1,9 @@
+FROM python:3.8-slim-buster
+WORKDIR /project
+ADD . /project
+RUN #apt-get update
+RUN #apt-get install ffmpeg libsm6 libxext6  -y
+COPY requirements.txt .
+RUN pip install --default-timeout=100 -r requirements.txt
+EXPOSE 8000
+CMD ["python","fast-main.py"]
