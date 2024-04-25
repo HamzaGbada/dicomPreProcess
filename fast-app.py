@@ -14,7 +14,7 @@ app = FastAPI()
 @app.post(
     "/applyFedbs",
     summary="Apply FEDBS Filter",
-    description="Apply the Frequency Edge Detector Based Segmentation (FEDBS) filter to a DICOM image for micro-calcification detection. The FEDBS filter employs various methods such as Difference of Gaussian filter (dog), Laplacian of Gaussian filter (log), and Fourier filter (fft) for segmentation. For more information, see [Semanticscholar article](https://www.semanticscholar.org/paper/Mammograms-calcifications-segmentation-based-on-and/aa9eb94e808a7830635b940d6b566f1e2f965708).",
+    description="Apply the Frequency Edge Detector Based Segmentation (FEDBS) filter to a DICOM image for micro-calcification detection. The FEDBS filter employs various methods such as Difference of Gaussian filter `dog`, Laplacian of Gaussian filter `log`, and Fourier filter `fft` for segmentation. For more information, see [Semanticscholar article](https://www.semanticscholar.org/paper/Mammograms-calcifications-segmentation-based-on-and/aa9eb94e808a7830635b940d6b566f1e2f965708).",
     responses={
         200: {
             "description": "Successfully processed image",
@@ -30,7 +30,7 @@ async def applyFedbs(
     file: UploadFile = File(..., description="DICOM file to apply the FEDBS filter on"),
     method: str = Query(
         "dog",
-        description="The method to apply: Difference of Gaussian filter (dog), Laplacian of Gaussian filter (log), or Fourier filter (fft).",
+        description="The method to apply: Difference of Gaussian filter `dog`, Laplacian of Gaussian filter `log`, or Fourier filter `fft`.",
     ),
     x: int = Query(
         ...,
