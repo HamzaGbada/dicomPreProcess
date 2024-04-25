@@ -54,39 +54,34 @@ async def upload_file(
     if not file.filename.lower().endswith('.dcm'):
         raise HTTPException(status_code=400, detail="Only DICOM files are allowed")
 
-    try:
-        image = Data.load_dicom_image(file.file)
-        array = image.array
-        fedbs_array = Data.fedbs_main(method, array)
+    image = Data.load_dicom_image(file.file)
+    array = image.array
+    fedbs_array = Data.fedbs_main(method, array)
 
-        # Get the region of interest from the original image array
-        roi_array = PixelArrayOperation.getROI(array, x, y)
+    # Get the region of interest from the original image array
+    roi_array = PixelArrayOperation.getROI(array, x, y)
 
-        # Get the region of interest from the processed image array
-        fedbs_roi_array = PixelArrayOperation.getROI(fedbs_array, x, y)
+    # Get the region of interest from the processed image array
+    fedbs_roi_array = PixelArrayOperation.getROI(fedbs_array, x, y)
 
-        # Convert the processed image array to an image
-        fedbs_image = Image.fromarray(fedbs_roi_array)
+    # Convert the processed image array to an image
+    fedbs_image = Image.fromarray(fedbs_roi_array)
 
-        # Save the image as a JPEG file
-        filename = f"{uuid.uuid4()}.jpg"
-        output_path = f"./{filename}"
-        print(f"fedbs images type {type(fedbs_image)}")
-        print(f"fedbs images  : \n{fedbs_image}")
-        fedbs_image.save(output_path, format="JPEG")
+    # Save the image as a JPEG file
+    filename = f"{uuid.uuid4()}.jpg"
+    output_path = f"./{filename}"
+    print(f"fedbs images type {type(fedbs_image)}")
+    print(f"fedbs images  : \n{fedbs_image}")
+    fedbs_image.save(output_path, format="JPEG")
 
-        # Read the saved JPEG file
-        with open(output_path, "rb") as file:
-            file_data = file.read()
+    # Read the saved JPEG file
+    with open(output_path, "rb") as file:
+        file_data = file.read()
 
-        # Remove the saved JPEG file
-        # os.remove(output_path)
-        if not output_path.is_file():
-            return {"error": "Image not found on the server"}
+    # Remove the saved JPEG file
+    # os.remove(output_path)
+    if not output_path.is_file():
+        return {"error": "Image not found on the server"}
 
-        return FileResponse("001.dcm", media_type='image/jpeg', filename="001.dcm")
-
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return FileResponse("001.dcm", media_type='image/jpeg', filename="001.dcm")
 
