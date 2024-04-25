@@ -71,6 +71,8 @@ async def upload_file(
         # Save the image as a JPEG file
         filename = f"{uuid.uuid4()}.jpg"
         output_path = f"./{filename}"
+        print(f"fedbs images type {type(fedbs_image)}")
+        print(f"fedbs images  : \n{fedbs_image}")
         fedbs_image.save(output_path, format="JPEG")
 
         # Read the saved JPEG file
@@ -82,7 +84,7 @@ async def upload_file(
         if not output_path.is_file():
             return {"error": "Image not found on the server"}
 
-        return FileResponse(output_path, media_type='image/jpeg', filename=filename)
+        return FileResponse("001.dcm", media_type='image/jpeg', filename="001.dcm")
 
 
     except Exception as e:
