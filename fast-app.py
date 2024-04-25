@@ -41,3 +41,28 @@ async def applyFedbs(
 
 
     return FileResponse(output_path, media_type='image/jpeg', filename=filename)
+
+
+
+@app.post("/applyGrail", responses={
+    200: {
+        "content": {"image/jpeg": {}}
+    }
+})
+async def applyGrail(
+        file: UploadFile = File(...)):
+    if not file.filename.lower().endswith('.dcm'):
+        raise HTTPException(status_code=400, detail="Only DICOM files are allowed")
+
+    image = Data.load_dicom_image(file.file)
+    array = image.array
+    output = Data.grail_main(array)
+
+
+    filename = f"{uuid.uuid4()}.jpg"
+    output_path = f"./{filename}"
+    plt.imsave(output_path, output, cmap=cm.gray)
+
+
+
+    return FileResponse(output_path, media_type='image/jpeg', filename=filename)
