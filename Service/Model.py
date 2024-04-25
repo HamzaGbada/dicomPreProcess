@@ -32,7 +32,6 @@ class Format(enum.Enum):
     RGB = 3
 
 
-
 class Image:
     def __init__(self, array, array_bits):
         self._array = array
@@ -128,7 +127,7 @@ class Data:
         This function is the main FEDBS algorithm. It binarize mammogram to make
         micro-calcification appear.
         For more about FEDBS algorithm check this:
-            https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.12144
+            https://www.semanticscholar.org/paper/Mammograms-calcifications-segmentation-based-on-and/aa9eb94e808a7830635b940d6b566f1e2f965708
         Parameters:
             method_type: Enum
             array: 2d ndarray to process.
