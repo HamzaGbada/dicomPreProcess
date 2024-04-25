@@ -32,6 +32,7 @@ import uvicorn
 from PIL import Image
 from fastapi import UploadFile, File, FastAPI, HTTPException, Query
 from fastapi.openapi.models import Response
+from starlette.responses import FileResponse
 
 from Mapper.mathOperation import PixelArrayOperation
 from Service.Model import Data
@@ -77,9 +78,12 @@ async def upload_file(
             file_data = file.read()
 
         # Remove the saved JPEG file
-        os.remove(output_path)
+        # os.remove(output_path)
+        if not output_path.is_file():
+            return {"error": "Image not found on the server"}
 
-        return fastapi.responses.FileResponse(output_path)
+        return FileResponse(output_path, media_type='image/jpeg', filename=filename)
+
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
