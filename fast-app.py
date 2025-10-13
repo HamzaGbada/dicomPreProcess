@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from fastapi import UploadFile, File, FastAPI, HTTPException, Query
 from matplotlib import cm
 from starlette.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from Mapper.mathOperation import PixelArrayOperation
 from Service.Model import Data
