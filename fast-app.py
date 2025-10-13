@@ -11,6 +11,13 @@ from Service.Model import Data
 app = FastAPI()
 
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],         # Allow all origins
+    allow_credentials=True,      # Allow cookies and Authorization headers
+    allow_methods=["*"],         # Allow all HTTP methods
+    allow_headers=["*"],         # Allow all headers
+)
 @app.post(
     "/applyFedbs",
     summary="Apply FEDBS Filter",
